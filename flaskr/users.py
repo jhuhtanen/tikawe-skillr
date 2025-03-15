@@ -1,7 +1,12 @@
+from flask import Blueprint
 from werkzeug.security import check_password_hash, generate_password_hash
 
 import db
 
+
+from flaskr.db import get_connection
+
+#bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def get_user(user_id):
     sql = "SELECT id, username FROM users WHERE id = ?"

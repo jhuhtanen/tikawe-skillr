@@ -1,0 +1,20 @@
+.logo img {
+    display: block;
+    margin: 0 auto 15px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.extra-links {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.extra-links a {
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.extra-links a:hover {
+    text-decoration: underline;
+}
