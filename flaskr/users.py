@@ -4,11 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import db
 
 
-from flaskr.db import get_connection
-
-#bp = Blueprint('auth', __name__, url_prefix='/auth')
-
-def get_user(user_id):
+'''def get_user(user_id):
     sql = "SELECT id, username FROM users WHERE id = ?"
     result = db.query(sql, [user_id])
     return result[0] if result else None
@@ -35,3 +31,4 @@ def login(username, password):
         return user_id
     else:
         return None
+'''

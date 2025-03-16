@@ -6,6 +6,12 @@ CREATE TABLE users (
     hash TEXT NOT NULL
 );
 
+CREATE TABLE password_reset_token (
+    email TEXT UNIQUE REFERENCES users(username),
+    reset_expiry
+    reset_token TEXT NOT NULL
+);
+
 CREATE TABLE skills (
     id INTEGER PRIMARY KEY,
     title TEXT,

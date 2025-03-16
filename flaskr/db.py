@@ -24,7 +24,6 @@ def execute(sql, params=[]):
     result = con.execute(sql, params)
     con.commit()
     g.last_insert_id = result.lastrowid
-    con.close()
 
 
 def last_insert_id():
@@ -34,7 +33,6 @@ def last_insert_id():
 def query(sql, params=[]):
     con = get_connection()
     result = con.execute(sql, params).fetchall()
-    con.close()
     return result
 
 
