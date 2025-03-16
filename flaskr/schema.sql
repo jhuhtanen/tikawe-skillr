@@ -8,7 +8,7 @@ CREATE TABLE users (
 
 CREATE TABLE password_reset_token (
     email TEXT UNIQUE REFERENCES users(username),
-    reset_expiry
+    reset_expiry INTEGER NOT NULL,
     reset_token TEXT NOT NULL
 );
 

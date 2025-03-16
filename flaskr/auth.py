@@ -116,11 +116,18 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user_id
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index'))
 
         flash(error)
 
     return render_template('auth/login.html')
+
+
+@bp.route('/logout')
+def logout():
+    session.clear()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('auth.login'))
 
 
 @bp.route('/forgot-password', methods=['GET', 'POST'])
