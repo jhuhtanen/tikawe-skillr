@@ -83,3 +83,16 @@ pip install flask
 python app.py
 
 * Open http://127.0.0.1:5000/ in a web browser.
+
+* Testing password reset:
+You can test the password reset in two ways. By using a mock service which just prints
+the email and link to the console from which it can be copied and pasted to browser URL. Or
+by having a local SMTP server which actually handles the SMTP call. The configuration is currently 
+in the config file under key EMAIL_INTERFACE.
+* Mock service. This is set by default and will just print it on the server console.
+* Local SMTP server: This requires SMTP server. You can install e.g. aiosmtpd with
+pip install aiosmtpd
+
+Note: This is NOT part of the default implementation because no additional
+python packages are not allowed to be installed. The site WILL function without
+this dependency.
