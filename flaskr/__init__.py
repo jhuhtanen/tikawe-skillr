@@ -30,7 +30,6 @@ def create_app(test_config=None):
     def home():
         if 'user_id' in session:
             return redirect(url_for('index'))
-        else:
-            return redirect(url_for('auth.login'))
+        return redirect(url_for('auth.login'))
 
     return app

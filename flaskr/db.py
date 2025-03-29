@@ -13,14 +13,16 @@ def get_connection():
     return g.db
 
 
-def close_connection(e=None):
+def close_connection():
     db = g.pop('db', None)
     if db is not None:
         db.close()
 
 
-def execute(sql, params=[]):
+def execute(sql, params=None):
     con = get_connection()
+    if params is None:
+        params = []
     result = con.execute(sql, params)
     con.commit()
     g.last_insert_id = result.lastrowid
@@ -30,8 +32,10 @@ def last_insert_id():
     return g.last_insert_id
 
 
-def query(sql, params=[]):
+def query(sql, params=None):
     con = get_connection()
+    if params is None:
+        params = []
     result = con.execute(sql, params).fetchall()
     return result
 
