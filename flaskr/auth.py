@@ -1,12 +1,14 @@
 import hashlib
 import re
 import secrets
-from datetime import time
+import time
 
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flaskr import db
+from flaskr.local_email_sender import LocalSmtpEmailInterface
+from flaskr.mock_email_handler import MockEmailInterface
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -20,9 +22,12 @@ def get_user(username):
     return result[0] if result else None
 
 
-def get_user_by_reset_token(username, reset_token, reset_expiry):
-    sql = "SELECT u.id FROM user u, password_reset_token t WHERE t.reset_token = ? AND t.reset_expiry >= ? AND u.username = ? and u.username = t.email"
-    result = db.query(sql, [reset_token, reset_expiry, username])
+def get_user_by_reset_token(token):
+    hashed_token = hashlib.sha256(token.encode()).hexdigest()
+    sql = "SELECT u.id " \
+          "FROM users u, password_reset_token t " \
+          "WHERE t.reset_token = ? AND t.reset_expiry >= ? AND u.username = t.email"
+    result = db.query(sql, [hashed_token, int(time.time())])
     return result[0] if result else None
 
 
@@ -33,15 +38,18 @@ def create_new_user(username, password):
     db.execute(sql, [username, method, salt, hash_value])
 
 
-def update_password(hashed_password, user):
-    db.execute("UPDATE user SET password = ?, reset_token = NULL, reset_expiry = NULL WHERE id = ?",
-               (hashed_password, user['id']))
-    db.commit()
+def update_password(new_password, user):
+    password_hash = generate_password_hash(new_password)
+    method, salt, hash_value = password_hash.split("$", 2)
+    db.execute("UPDATE users SET method = ?, salt = ?, hash = ? WHERE id = ?",
+               (method, salt, hash_value, user['id']))
 
 
-def reset_password_token(email):
-    db.execute("UPDATE password_reset_token SET reset_token = NULL, reset_expiry = NULL WHERE email = ?", email)
-    db.commit()
+def reset_password_token(user):
+    sql = "DELETE " \
+          "from password_reset_token " \
+          "WHERE email = (SELECT username from users where id = ?)"
+    db.execute(sql, [user['id']])
 
 
 def do_login(username, password):
@@ -56,22 +64,20 @@ def do_login(username, password):
     method = result[0]["method"]
     if check_password_hash(f"{method}${salt}${hash_value}", password):
         return user_id
-    else:
-        return None
+    return None
 
 
 def generate_reset_token():
     token = secrets.token_urlsafe(32)
-    timestamp = int(time.time())
-    full_token = f"{token}:{timestamp}"
+    hashed_token = hashlib.sha256(token.encode()).hexdigest()
+    expiry = int(time.time()) + current_app.config['RESET_TOKEN_VALIDITY_SECONDS']
 
-    hashed_token = hashlib.sha256(full_token.encode()).hexdigest()
-    return token, hashed_token, timestamp
+    return token, hashed_token, expiry
 
 
 def update_token(hashed_token, expiry, email):
-    db.execute("UPDATE password_reset_token SET reset_token = ?, reset_expiry = ? WHERE email = ?",
-               (hashed_token, expiry, email))
+    db.execute("insert or replace into password_reset_token (email, reset_token, reset_expiry) values (?, ?, ?)",
+               (email, hashed_token, expiry))
 
 
 @bp.route("/register", methods=['GET', 'POST'])
@@ -86,7 +92,8 @@ def register():
             return render_template('auth/register.html')
 
         if not re.match(PASSWORD_REGEX, password1):
-            flash('Password must be at least 8 characters long, include a number, an uppercase letter, and a special character.', 'danger')
+            flash('Password must be at least 8 characters long, '
+                  'include a number, an uppercase letter, and a special character.', 'danger')
             return render_template('auth/register.html')
 
         existing_user = get_user(email)
@@ -118,7 +125,7 @@ def login():
             session['user_id'] = user_id
             return redirect(url_for('main.index'))
 
-        flash(error)
+        flash(error, 'danger')
 
     return render_template('auth/login.html')
 
@@ -139,62 +146,72 @@ def forgot_password():
         if user:
             token, hashed_token, timestamp = generate_reset_token()
 
-            expiry = timestamp + 900
+            token_validity = current_app.config['RESET_TOKEN_VALIDITY_SECONDS']
+            expiry = timestamp + token_validity
             update_token(hashed_token, expiry, email)
 
             reset_link = f"http://127.0.0.1:5000/auth/reset-password?token={token}"
-            send_email(email, reset_link)
+            send_password_reset_email(email, reset_link)
 
             flash('Password reset link sent to your email.', 'info')
         else:
             flash('Email not found.', 'danger')
 
-    return render_template('forgot_password.html')
+    return render_template('auth/forgot_password.html')
 
 
 @bp.route('/reset-password', methods=['GET', 'POST'])
 def reset_password():
-    token = request.args.get('token')
+    token = request.args.get('token') if request.method == 'GET' else request.form.get('token')
     if not token:
         flash("Invalid or expired reset link.", "danger")
         return redirect(url_for('auth.forgot_password'))
 
-    # Hash the received token for verification
-    timestamp = int(time.time())
-    token_hashes = [
-        hashlib.sha256(f"{token}:{ts}".encode()).hexdigest()
-        for ts in range(timestamp - 900, timestamp + 1)
-    ]
-
-    user = get_user_by_reset_token(token_hashes, timestamp)
+    user = get_user_by_reset_token(token)
 
     if not user:
         flash("Invalid or expired reset link.", "danger")
         return redirect(url_for('auth.forgot_password'))
 
     if request.method == 'POST':
-        new_password = request.form['password']
-        hashed_password = generate_password_hash(new_password)
+        password1 = request.form['password1']
+        password2 = request.form['password2']
 
-        update_password(hashed_password, user)
-        reset_password_token()
+        check_password(password1, password2, 'auth/reset_password.html')
+
+        update_password(password1, user)
+        reset_password_token(user)
 
         flash("Your password has been reset. Please log in.", "success")
         return redirect(url_for('auth.login'))
 
-    return render_template('reset_password.html')
+    return render_template('auth/reset_password.html')
 
 
-def send_email(to_email, reset_link):
-    sender_email = "support@skillr.com"
-    sender_password = "your-password"
+def check_password(password1, password2, error_template_path):
+    if password1 != password2:
+        flash('Passwords do not match.', 'danger')
+        return render_template(error_template_path)
 
-    subject = "Password Reset Request"
-    body = f"Click the link to reset your password: {reset_link}"
+    if not re.match(PASSWORD_REGEX, password1):
+        flash(
+            'Password must be at least 8 characters long, '
+            'include a number, an uppercase letter, and a special character.',
+            'danger')
+        return render_template(error_template_path)
 
-    message = f"Subject: {subject}\n\n{body}"
 
-    with smtplib.SMTP("smtp.example.com", 587) as server:
-        server.starttls()
-        server.login(sender_email, sender_password)
-        server.sendmail(sender_email, to_email, message)
+def email_interface_configuration_value(interface_value):
+    if interface_value == 'mock':
+        return MockEmailInterface()
+
+    if interface_value == 'aiosmtpd':
+        return LocalSmtpEmailInterface()
+
+    raise NotImplementedError(f"interface not available for value {interface_value}")
+
+
+def send_password_reset_email(email, reset_link):
+    email_interface_setting = current_app.config['EMAIL_INTERFACE']
+    service = email_interface_configuration_value(email_interface_setting)
+    service.send_email(email, reset_link)
