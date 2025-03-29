@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ skill.title }} - Skill Details{% endblock %}
+
+{% block content %}
+    <div class="skill-detail">
+        <h2>{{ skill.title }}</h2>
+        <p>{{ skill.description }}</p>
+
+        {% if skill.is_free %}
+            <p><strong>Price:</strong> Free</p>
+        {% else %}
+            <p><strong>Price:</strong> {{ skill.price }} €</p>
+        {% endif %}
+
+        <p><strong>Posted by:</strong> {{ skill.user.name }}</p>
+
+        {% if skill.images %}
+            <div class="skill-images">
+                {% for image in skill.images %}
+                    <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="{{ skill.title }}">
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
+    </div>
+{% endblock %}

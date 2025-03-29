@@ -1,0 +1,140 @@
+
+main {
+    display: flex;
+    justify-content: center;  /* Center content horizontally */
+    align-items: center;  /* Align content vertically (optional) */
+    flex-direction: column;  /* Stack content vertically */
+    width: 100%;
+}
+
+/* ===== FORM STYLING ===== */
+.form-container {
+    background: white;
+    max-width: 500px;
+    margin: 80px auto 20px; /* Space below header */
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #444;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group textarea {
+    resize: vertical; /* Allows user to expand the text area */
+    height: 100px;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    border-color: #0073e6;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 115, 230, 0.5);
+}
+
+/* Checkbox & Radio Styling */
+.form-group .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    transform: scale(1.2);
+}
+
+/* Submit Button */
+.btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #0073e6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+}
+
+.btn:hover {
+    background-color: #005bb5;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    .form-container {
+        width: 90%;
+        padding: 20px;
+    }
+}
+
+
+.skill-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive grid */
+    gap: 20px;
+    max-width: 1200px; /* Ensures it doesn't stretch too wide */
+    width: 100%;
+    padding: 20px;
+}
+
+.skill-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.skill-card:hover {
+    transform: scale(1.05);
+}
+
+.skill-card img {
+    width: 100%;
+    max-height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}s
+
+.skill-info {
+    padding: 15px;
+    text-align: center;
+}
+
+.skill-info h3 {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.skill-info .price {
+    font-weight: bold;
+    color: #28a745;
+}
