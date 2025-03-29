@@ -6,6 +6,11 @@ CREATE TABLE users (
     hash TEXT NOT NULL
 );
 
+CREATE TABLE user_profile (
+    user_id TEXT UNIQUE REFERENCES users(id),
+    name TEXT NOT NULL
+);
+
 CREATE TABLE password_reset_token (
     email TEXT UNIQUE REFERENCES users(username),
     reset_expiry INTEGER NOT NULL,
@@ -17,7 +22,7 @@ CREATE TABLE skills (
     title TEXT,
     description TEXT,
     is_free BOOLEAN NOT NULL CHECK (is_free IN (0, 1)),
-    start_price INTEGER,
+    price INTEGER,
     user_id INTEGER REFERENCES users
 );
 
@@ -36,18 +41,24 @@ CREATE TABLE categories (
 
 CREATE TABLE category_values (
     id INTEGER PRIMARY KEY,
-    category_id INTEGER REFERENCES categories,
+    category_id INTEGER REFERENCES categories ON DELETE CASCADE,
     value TEXT
 );
 
 CREATE TABLE skill_categories (
     id INTEGER PRIMARY KEY,
-    skill_id INTEGER REFERENCES skills,
-    category_id INTEGER REFERENCES categories
+    skill_id INTEGER REFERENCES skills ON DELETE CASCADE,
+    category_value_id INTEGER REFERENCES category_values ON DELETE CASCADE
 );
+
+-- CREATE TABLE skill_images (
+--     id INTEGER PRIMARY KEY,
+--     skill_id INTEGER REFERENCES skills,
+--    image BLOB
+--);
 
 CREATE TABLE skill_images (
     id INTEGER PRIMARY KEY,
     skill_id INTEGER REFERENCES skills,
-    image BLOB
+    image_path TEXT
 );
