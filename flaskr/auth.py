@@ -36,12 +36,12 @@ def create_new_user(username, password):
 def update_password(hashed_password, user):
     db.execute("UPDATE user SET password = ?, reset_token = NULL, reset_expiry = NULL WHERE id = ?",
                (hashed_password, user['id']))
-    db.commit()
+    #db.commit()
 
 
 def reset_password_token(email):
     db.execute("UPDATE password_reset_token SET reset_token = NULL, reset_expiry = NULL WHERE email = ?", email)
-    db.commit()
+    #db.commit()
 
 
 def do_login(username, password):
