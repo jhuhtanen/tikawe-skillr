@@ -2,6 +2,10 @@
 
 {% block title %}{{ skill.title }} - Skill Details{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
 {% block content %}
     <div class="skill-detail">
         <h2>{{ skill.title }}</h2>
@@ -23,6 +27,13 @@
             </div>
         {% endif %}
 
-        <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
+        {% if session["user_id"] == skill.user_id %}
+            <div class="skill-actions">
+                <a href="{{ url_for('skill.edit_skill', skill_id=skill.id) }}" class="btn">Update</a>
+                <a href="{{ url_for('skill.delete_skill', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
+            </div>
+        {% else %}
+            <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
+        {% endif %}
     </div>
 {% endblock %}

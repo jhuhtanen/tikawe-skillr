@@ -138,3 +138,38 @@ main {
     font-weight: bold;
     color: #28a745;
 }
+
+.skill-detail {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.skill-images img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+}
+
+.skill-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #fff;
+    background: #007bff;
+    border-radius: 5px;
+}
+
+.delete-btn {
+    background: #dc3545;
+}

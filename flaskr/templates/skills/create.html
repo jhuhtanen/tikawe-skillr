@@ -13,7 +13,7 @@
     <form action="{{ url_for('skill.create_skill') }}" method="get">
     <div class="form-group">
         <label for="category">Category</label>
-        <select id="category" name="category" required onchange="this.form.submit()">
+        <select id="category" name="category" required>
             <option value="">Select a Category</option>
             {% for cat_id, cat in categories.items() %}
                 <option value="{{ cat_id }}" {% if selected_category == cat_id %}selected{% endif %}>
@@ -23,18 +23,10 @@
         </select>
     </div>
     <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+    <button type="submit" class="btn">Update Category</button>
     </form>
 
     <form action="{{ form_action }}" method="post" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="title">Skill Title</label>
-            <input type="text" id="title" name="title" value="{{ skill.title if skill else '' }}" required>
-        </div>
-
-        <div class="form-group">
-            <label for="description">Description</label>
-            <textarea id="description" name="description" required>{{ skill.description if skill else '' }}</textarea>
-        </div>
 
         {% if selected_category %}
             <div class="form-group">
@@ -49,6 +41,16 @@
         {% endif %}
 
         <div class="form-group">
+            <label for="title">Skill Title</label>
+            <input type="text" id="title" name="title" value="{{ skill.title if skill else '' }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" required>{{ skill.description if skill else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
             <label>Is this skill free?</label>
             <div class="checkbox-label">
                 <input type="radio" id="free_yes" name="is_free" value="1" {{ "checked" if skill and skill.is_free else "checked" }}>
@@ -60,7 +62,7 @@
             </div>
         </div>
 
-        <div class="form-group" id="price-group" style="display: none;">
+        <div class="form-group" id="price-group">
             <label for="price">Price (€)</label>
             <input type="number" id="price" name="price" min="1" value="{{ skill.price if skill else '' }}">
         </div>
