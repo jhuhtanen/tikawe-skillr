@@ -34,7 +34,7 @@
                 <select id="subcategory" name="subcategory" required>
                     <option value="">Select a Subcategory</option>
                     {% for sub in categories[selected_category]['values'] %}
-                        <option value="{{ sub.id }}">{{ sub.value }}</option>
+                        <option value="{{ sub.id }}" {% if selected_subcategory == sub.value %}selected{% endif %}>{{ sub.value }}</option>
                     {% endfor %}
                 </select>
             </div>

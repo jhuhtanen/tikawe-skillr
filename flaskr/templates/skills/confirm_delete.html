@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block title %} Delete Skill {% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+<h3>Confirm delete</h3>
+<p>Are you really sure you want to remove the skill?</p>
+<form action="{{ url_for('skill.delete_skill', skill_id=skill.id) }}" method="post">
+    <input type="submit" name="remove" class="btn delete-btn" value="Confirm delete">
+</form>
+<p>
+  <a href="{{ url_for('skill.list_skills') }}">Back to safety</a>
+</p>
+{% endblock %}

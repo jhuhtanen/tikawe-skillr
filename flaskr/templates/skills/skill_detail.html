@@ -30,7 +30,7 @@
         {% if session["user_id"] == skill.user_id %}
             <div class="skill-actions">
                 <a href="{{ url_for('skill.edit_skill', skill_id=skill.id) }}" class="btn">Update</a>
-                <a href="{{ url_for('skill.delete_skill', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
+                <a href="{{ url_for('skill.confirm_delete', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
             </div>
         {% else %}
             <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
