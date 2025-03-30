@@ -2,8 +2,9 @@ import hashlib
 import re
 import secrets
 import time
+from functools import wraps
 
-from flask import Blueprint, render_template, request, session, flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, session, flash, redirect, url_for, current_app, g
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flaskr import db
@@ -215,3 +216,13 @@ def send_password_reset_email(email, reset_link):
     email_interface_setting = current_app.config['EMAIL_INTERFACE']
     service = email_interface_configuration_value(email_interface_setting)
     service.send_email(email, reset_link)
+
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if "user_id" not in session:
+            flash("You need to log in to access this page.", "warning")
+            return redirect(url_for("auth.login"))  # Redirect to login page
+        return f(*args, **kwargs)
+    return decorated_function
