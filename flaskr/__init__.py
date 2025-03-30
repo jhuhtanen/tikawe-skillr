@@ -1,7 +1,7 @@
 import os
 
 from flask import Flask, session, redirect, url_for
-from flaskr import db, auth, main
+from flaskr import db, auth, main, skills, image_upload
 
 
 def create_app(test_config=None):
@@ -25,6 +25,8 @@ def create_app(test_config=None):
     db.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
+    app.register_blueprint(skills.bp)
+    app.register_blueprint(image_upload.bp)
 
     @app.route('/')
     def home():
