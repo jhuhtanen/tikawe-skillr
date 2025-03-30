@@ -1,10 +1,10 @@
 import os
-from flask import request, redirect, url_for, Blueprint
+from flask import request, redirect, url_for, Blueprint, current_app
 from werkzeug.utils import secure_filename
 
 from flaskr import db
 
-UPLOAD_FOLDER = 'static/uploads'
+#UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 bp = Blueprint("upload", __name__, url_prefix="/upload")
@@ -25,7 +25,7 @@ def upload_file(skill_id):
         return "Invalid file", 400
 
     filename = secure_filename(f"skill_{skill_id}_{file.filename}")
-    file_path = os.path.join(UPLOAD_FOLDER, filename)
+    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     file.save(file_path)
 
     db.execute("INSERT INTO skill_images (skill_id, image_path) VALUES (?, ?)", [skill_id, file_path])
