@@ -6,12 +6,14 @@ from flask import Blueprint, request, render_template, redirect, url_for, flash,
 from werkzeug.utils import secure_filename
 
 from flaskr import db
+from flaskr.auth import login_required
 
 bp = Blueprint("skill", __name__, url_prefix="/skills")
 
 
 # Create a new skill listing
 @bp.route("/create", methods=["GET", "POST"])
+@login_required
 def create_skill():
     if "categories" not in session:
         session["categories"] = build_categories()
@@ -59,6 +61,7 @@ def create_skill():
 
 # Update an existing skill
 @bp.route("/skill/<int:skill_id>/edit", methods=["GET", "POST"])
+@login_required
 def edit_skill(skill_id):
     skill = get_skill(skill_id)
     images = get_skill_images(skill_id)
@@ -112,12 +115,14 @@ def edit_skill(skill_id):
 
 
 @bp.route("/skill/<int:skill_id>/confirm_delete", methods=["GET"])
+@login_required
 def confirm_delete(skill_id):
     skill = get_skill(skill_id)
     return render_template("skills/confirm_delete.html", skill=skill)
 
 
 @bp.route("/skill/<int:skill_id>/delete", methods=["POST"])
+@login_required
 def delete_skill(skill_id):
     delete_skill_images(skill_id)
     delete_skill_db(skill_id)
@@ -127,12 +132,14 @@ def delete_skill(skill_id):
 
 # List all skills
 @bp.route("/")
+@login_required
 def list_skills():
     skills = get_all_skills()
     return render_template("skills/list.html", skills=skills)
 
 
 @bp.route('/skill/<int:skill_id>')
+@login_required
 def skill_detail(skill_id):
     skill = get_skill(skill_id)
 
