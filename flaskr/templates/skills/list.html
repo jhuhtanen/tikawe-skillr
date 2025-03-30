@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+
+{% block title %}Browse Skills{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Available Skills</h2>
+    <div class="skill-grid">
+        {% for skill in skills %}
+            <div class="skill-card">
+                <a href="{{ url_for('skill.skill_detail', skill_id=skill.id) }}">
+                    {% if skill.image_path %}
+                        <img src="{{ url_for('static', filename=skill.image_path) }}" alt="{{ skill.title }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="No Image">
+                    {% endif %}
+                </a>
+                <div class="skill-info">
+                    <h3><a href="{{ url_for('skill.skill_detail', skill_id=skill.id) }}">{{ skill.title }}</a></h3>
+                    {% if skill.is_free %}
+                        <p class="price">Free</p>
+                    {% else %}
+                        <p class="price">{{ skill.price }} €</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

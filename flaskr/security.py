@@ -27,3 +27,4 @@ def check_password_hash(hashed_pwd, password):
     stored_hash = base64.b64decode(hash_encoded)
     password_bytes = password.encode("utf-8")
     return hmac.compare_digest(hashlib.scrypt(password_bytes, salt=salt, n=16384, r=8, p=1), stored_hash)
+
