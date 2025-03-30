@@ -16,10 +16,10 @@ def create_skill():
     selected_category = request.args.get("category", None)
     selected_subcategory = request.args.get("subcategory", None)
 
-    print("Selected category:", selected_category)
+    #print("Selected category:", selected_category)
     #print("Available categories:", session["categories"])
-    for key, value in session["categories"].items():
-        print(f"Key: {key} (type: {type(key)}) -> Value: {value}")
+    #for key, value in session["categories"].items():
+    #    print(f"Key: {key} (type: {type(key)}) -> Value: {value}")
 
     if request.method == "POST":
         title = request.form["title"]
@@ -56,6 +56,12 @@ def edit_skill(skill_id):
     skill = get_skill(skill_id)
     images = get_skill_images(skill_id)
 
+    if "categories" not in session:
+        session["categories"] = build_categories()
+
+    selected_category = request.args.get("category", None)
+    selected_subcategory = request.args.get("subcategory", None)
+
     if skill is None:
         flash("Skill not found.")
         return redirect(url_for("skill.list_skills"))
@@ -79,7 +85,11 @@ def edit_skill(skill_id):
         flash("Skill updated!")
         return redirect(url_for("skill.list_skills"))
     return render_template("skills/create.html", form_mode='update', form_action=url_for('skill.edit_skill', skill_id=skill_id),
-                           button_text="Update Skill", skill=skill)
+                           button_text="Update Skill", skill=skill,
+                           categories=session["categories"],
+                           selected_category=selected_category if selected_category else None,
+                           selected_subcategory=selected_category if selected_category else None
+                           )
     #return render_template("skills/edit.html", skill=skill, images=images)
 
 @bp.route("/<int:skill_id>/delete", methods=["POST"])
