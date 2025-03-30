@@ -51,12 +51,6 @@ CREATE TABLE skill_categories (
     category_value_id INTEGER REFERENCES category_values ON DELETE CASCADE
 );
 
--- CREATE TABLE skill_images (
---     id INTEGER PRIMARY KEY,
---     skill_id INTEGER REFERENCES skills,
---    image BLOB
---);
-
 CREATE TABLE skill_images (
     id INTEGER PRIMARY KEY,
     skill_id INTEGER REFERENCES skills,
