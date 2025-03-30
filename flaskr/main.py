@@ -8,3 +8,17 @@ def index():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     return render_template('index.html')
+
+
+@bp.route('/terms')
+def terms():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    return render_template('index.html')
+
+
+@bp.route('/privacy')
+def privacy():
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+    return render_template('index.html')
