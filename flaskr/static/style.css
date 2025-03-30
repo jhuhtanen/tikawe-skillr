@@ -6,6 +6,29 @@
     font-family: Arial, sans-serif;
 }
 
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column; /* Ensures proper stacking */
+}
+
+main {
+    flex: 1; /* Allows main to take up remaining space */
+    overflow-y: auto; /* Enables scrolling inside main if needed */
+    padding: 20px; /* Ensures content doesn't touch edges */
+}
+
+header, footer {
+    flex-shrink: 0; /* Prevents them from squishing */
+    width: 100%;
+    background-color: #f8f8f8; /* Just to differentiate */
+    padding: 10px 0;
+    text-align: center;
+    position: relative; /* Ensures they don’t overlay */
+}
+
 body {
     background-color: #f4f4f4;
     display: flex;
@@ -21,6 +44,7 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+    overflow-y: auto;
 }
 
 h2 {

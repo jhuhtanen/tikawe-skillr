@@ -2,7 +2,6 @@ import os
 import sys
 
 from flask import Blueprint, request, render_template, redirect, url_for, flash, g, session, current_app
-import sqlite3
 
 from werkzeug.utils import secure_filename
 
@@ -19,11 +18,6 @@ def create_skill():
 
     selected_category = request.args.get("category", None)
     selected_subcategory = request.args.get("subcategory", None)
-
-    #print("Selected category:", selected_category)
-    #print("Available categories:", session["categories"])
-    #for key, value in session["categories"].items():
-    #    print(f"Key: {key} (type: {type(key)}) -> Value: {value}")
 
     if request.method == "POST":
         title = request.form["title"]
@@ -48,8 +42,8 @@ def create_skill():
             for img in images[:3]:
                 if img.filename:
                     filename = secure_filename(f"skill_{skill_id}_{img.filename}")
-                    file_path2 = os.path.join(upload_folder, filename)
-                    img.save(file_path2)
+                    file_path = os.path.join(upload_folder, filename)
+                    img.save(file_path)
                     add_skill_image(skill_id, f"uploads/{filename}")
 
             flash("Skill listing created with images!")
@@ -80,16 +74,15 @@ def edit_skill(skill_id):
     if skill is None:
         flash("Skill not found.")
         return redirect(url_for("skill.list_skills"))
-    #else:
-    #    print("skill desc {}".format(skill["description"]), file=sys.stderr)
 
     if request.method == "POST":
         title = request.form["title"]
         description = request.form["description"]
+        subcategory_id = request.form["subcategory"]
         is_free = request.form.get("is_free") == "on"
         price = request.form["price"] if not is_free else None
 
-        update_skill(skill_id, title, description, is_free, price, selected_subcategory)
+        update_skill(skill_id, title, description, is_free, price, subcategory_id)
 
         base_dir = os.path.dirname(os.path.abspath(__file__))
         upload_folder = os.path.join(base_dir, current_app.config['UPLOAD_FOLDER'])
@@ -196,7 +189,7 @@ def update_skill(skill_id, title, description, is_free, price, subcategory_id):
         [title, description, int(is_free), price, skill_id]
     )
     db.execute(
-        "UPDATE skill_categories SET category_value_id = ? WHERE id = ?",
+        "UPDATE skill_categories SET category_value_id = ? WHERE skill_id = ?",
         [subcategory_id, skill_id]
     )
 

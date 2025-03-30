@@ -96,3 +96,17 @@ pip install aiosmtpd
 Note: This is NOT part of the default implementation because no additional
 python packages are not allowed to be installed. The site WILL function without
 this dependency.
+
+
+===
+
+## Delivery on 30.04.2025
+* Current functionality:
+
+User can register and loging to the site. They can request forgotten password link and reset password using it.
+User can create a skill listing, edit it and delete it.
+User can search skills by using text search from title or description.
+
+NOTE: In order for the app to work the config.py from project root needs to be copied to instance folder.
+I couldn't figure out why it needs to be copied there yet but application uses config keys and instance folder is
+by default on gitignore because it's instance level data.
