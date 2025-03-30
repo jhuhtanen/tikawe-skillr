@@ -13,7 +13,7 @@ def get_connection():
     return g.db
 
 
-def close_connection():
+def close_connection(e=None):
     db = g.pop('db', None)
     if db is not None:
         db.close()
@@ -61,3 +61,4 @@ sqlite3.register_converter(
 def init_app(app):
     app.teardown_appcontext(close_connection)
     app.cli.add_command(init_db_command)
+
