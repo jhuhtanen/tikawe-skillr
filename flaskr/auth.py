@@ -14,7 +14,7 @@ from flaskr.mock_email_handler import MockEmailInterface
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 # Password regex: at least 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character
-PASSWORD_REGEX = r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$'
+PASSWORD_REGEX = r'^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&^%#])[A-Za-z\d@$!%*?&^%#]{8,}$'
 
 
 def get_user(username):
@@ -94,7 +94,7 @@ def register():
 
         if not re.match(PASSWORD_REGEX, password1):
             flash('Password must be at least 8 characters long, '
-                  'include a number, an uppercase letter, and a special character.', 'danger')
+                  'include a number, an uppercase letter, and a special character (@$!%*?&^%#).', 'danger')
             return render_template('auth/register.html')
 
         existing_user = get_user(email)
