@@ -1,7 +1,7 @@
 import os
 import sys
 
-from flask import Blueprint, request, render_template, redirect, url_for, flash, g, session, current_app
+from flask import Blueprint, request, render_template, redirect, url_for, flash, g, session, current_app, abort
 
 from werkzeug.utils import secure_filename
 
@@ -64,6 +64,9 @@ def create_skill():
 @login_required
 def edit_skill(skill_id):
     skill = get_skill(skill_id)
+    # check the requester actually owns this skill
+    check_skill_ownership(skill)
+
     images = get_skill_images(skill_id)
 
     if "categories" not in session:
@@ -118,12 +121,19 @@ def edit_skill(skill_id):
 @login_required
 def confirm_delete(skill_id):
     skill = get_skill(skill_id)
+    # check the requester actually owns this skill
+    check_skill_ownership(skill)
+
     return render_template("skills/confirm_delete.html", skill=skill)
 
 
 @bp.route("/skill/<int:skill_id>/delete", methods=["POST"])
 @login_required
 def delete_skill(skill_id):
+    skill = get_skill(skill_id)
+    # check the requester actually owns this skill
+    check_skill_ownership(skill)
+
     delete_skill_images(skill_id)
     delete_skill_db(skill_id)
     flash("Skill and images deleted!")
@@ -247,3 +257,8 @@ def delete_existing_skill_images(skill_id):
             os.remove(full_path)
 
     db.execute("DELETE FROM skill_images WHERE skill_id = ?", [skill_id])
+
+
+def check_skill_ownership(skill):
+    if skill["user_id"] != session["user_id"]:
+        abort(403)
