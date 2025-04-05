@@ -128,7 +128,7 @@ main {
     max-height: 150px;
     object-fit: cover;
     border-radius: 10px;
-}s
+}
 
 .skill-info {
     padding: 15px;
@@ -155,6 +155,16 @@ main {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.skill-detail .price {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.skill-detail h2 {
+    margin: 18px 0;
+    font-size: 36px;
+}
+
 .skill-images img {
     max-width: 100%;
     height: auto;
@@ -171,6 +181,7 @@ main {
     display: inline-block;
     padding: 10px 15px;
     text-decoration: none;
+    text-align: center;
     color: #fff;
     background: #007bff;
     border-radius: 5px;

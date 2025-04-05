@@ -2,15 +2,19 @@
 
 {% block title %}{{ skill.title }} - Skill Details{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
 {% block content %}
     <div class="skill-detail">
         <h2>{{ skill.title }}</h2>
         <p>{{ skill.description }}</p>
 
         {% if skill.is_free %}
-            <p><strong>Price:</strong> Free</p>
+            <p class="price"><strong>Price:</strong> Free</p>
         {% else %}
-            <p><strong>Price:</strong> {{ skill.price }} €</p>
+            <p class="price"><strong>Price:</strong> {{ skill.price }} €</p>
         {% endif %}
 
         <p><strong>Posted by:</strong> {{ skill.username }}</p>
@@ -29,7 +33,7 @@
                 <a href="{{ url_for('skill.delete_skill', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
             </div>
         {% else %}
-            <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
+            <a href="/order/{{ skill.id }}" class="btn">Place an order</a>
         {% endif %}
     </div>
 {% endblock %}

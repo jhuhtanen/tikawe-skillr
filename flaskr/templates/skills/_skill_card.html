@@ -3,7 +3,7 @@
         {% if skill.image_path %}
             <img src="{{ url_for('static', filename=skill.image_path) }}" alt="{{ skill.title }}">
         {% else %}
-            <img src="{{ url_for('static', filename='images/placeholder.jpg') }}" alt="No Image">
+            <img src="{{ url_for('static', filename='placeholder.png') }}" alt="No Image">
         {% endif %}
     </a>
     <div class="skill-info">
