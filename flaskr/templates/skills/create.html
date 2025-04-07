@@ -9,32 +9,40 @@
 {% block content %}
 <div class="form-container">
     <h2>{{ "Update Skill" if form_mode == 'update' else "Create a Skill Listing" }}</h2>
-
-    <form action="{{ url_for('skill.create_skill') }}" method="get">
+    {% if form_mode == 'create' %}
+        <form action="{{ url_for('skill.create_skill') }}" method="get">
+    {% endif %}
+    {% if form_mode == 'update' %}
+        <form action="{{ url_for('skill.edit_skill', skill_id=skill.id) }}" method="get">
+    {% endif %}
     <div class="form-group">
         <label for="category">Category</label>
         <select id="category" name="category" required>
             <option value="">Select a Category</option>
             {% for cat_id, cat in categories.items() %}
-                <option value="{{ cat_id }}" {% if selected_category == cat_id %}selected{% endif %}>
+                <option value="{{ cat_id }}" {% if form.category == cat_id %}selected{% endif %}>
                     {{ cat.title }}
                 </option>
             {% endfor %}
         </select>
     </div>
-    <input type="hidden" name="subcategory" value="{{ selected_subcategory }}">
+    <input type="hidden" name="form_mode" value="{{ form_mode }}">
     <button type="submit" class="btn">Update Category</button>
     </form>
 
     <form action="{{ form_action }}" method="post" enctype="multipart/form-data">
 
-        {% if selected_category %}
+        <input type="hidden" name="category" value="{{ form.category }}">
+
+        {% if form.category %}
             <div class="form-group">
                 <label for="subcategory">Subcategory</label>
                 <select id="subcategory" name="subcategory" required>
                     <option value="">Select a Subcategory</option>
-                    {% for sub in categories[selected_category]['values'] %}
-                        <option value="{{ sub.id }}" {% if selected_subcategory == sub.value %}selected{% endif %}>{{ sub.value }}</option>
+                    {% for sub in categories[form.category]['values'] %}
+                        <option value="{{ sub.id }}" {% if form.subcategory == sub.id %}selected{% endif %}>
+                            {{ sub.value}}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
@@ -42,35 +50,43 @@
 
         <div class="form-group">
             <label for="title">Skill Title</label>
-            <input type="text" id="title" name="title" value="{{ skill.title if skill else '' }}" required>
+            <input type="text" id="title" name="title" value="{{ form.title }}" required maxlength="256">
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" required>{{ skill.description if skill else '' }}</textarea>
+            <textarea id="description" name="description" required maxlength="2048">{{ form.description }}</textarea>
         </div>
 
         <div class="form-group">
             <label>Is this skill free?</label>
             <div class="checkbox-label">
-                <input type="radio" id="free_yes" name="is_free" value="1" {{ "checked" if skill and skill.is_free else "checked" }}>
+                <input type="radio" id="free_yes" name="is_free" value="1" {% if form.is_free %} checked {% endif %}>
                 <label for="free_yes">Yes</label>
             </div>
             <div class="checkbox-label">
-                <input type="radio" id="free_no" name="is_free" value="0" {{ "checked" if skill and skill.is_free == False else "" }}>
+                <input type="radio" id="free_no" name="is_free" value="0" {% if not form.is_free %} checked {% endif %}>
                 <label for="free_no">No</label>
             </div>
         </div>
 
         <div class="form-group" id="price-group">
             <label for="price">Price (€)</label>
-            <input type="number" id="price" name="price" min="1" value="{{ skill.price if skill else '' }}">
+            <input type="number" id="price" name="price" min="1" {% if form.price %}value="{{ form.price }}"{% endif %}>
         </div>
 
         <div class="form-group">
             <label for="images">Upload Images (Max 3)</label>
             <input type="file" id="images" name="images" accept="image/*" multiple>
         </div>
+
+        {% if form.errors %}
+        <div class="flash-messages">
+            {% for error in form.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
          <button type="submit" class="btn">{{ button_text }}</button>
     </form>
