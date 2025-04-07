@@ -1,7 +1,7 @@
 import smtplib
 
 from flask import current_app
-from flaskr.email import EmailInterface
+from flaskr.email_interface import EmailInterface
 
 
 class LocalSmtpEmailInterface(EmailInterface):
