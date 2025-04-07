@@ -12,18 +12,16 @@
         <p>{{ skill.description }}</p>
 
         {% if skill.is_free %}
-            <p><strong>Price:</strong> Free</p>
+            <p class="price"><strong>Price:</strong> Free</p>
         {% else %}
-            <p><strong>Price:</strong> {{ skill.price }} €</p>
+            <p class="price"><strong>Price:</strong> {{ skill.price }} €</p>
         {% endif %}
 
         <p><strong>Posted by:</strong> {{ skill.username }}</p>
 
-        {% if skill.images %}
+        {% if skill.image_path %}
             <div class="skill-images">
-                {% for image in skill.images %}
-                    <img src="{{ url_for('static', filename='uploads/' + image) }}" alt="{{ skill.title }}">
-                {% endfor %}
+                <img src="{{ url_for('static', filename=skill.image_path) }}" alt="{{ skill.title }}">
             </div>
         {% endif %}
 
@@ -33,7 +31,9 @@
                 <a href="{{ url_for('skill.confirm_delete', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
             </div>
         {% else %}
-            <a href="/order/{{ skill.id }}" class="btn">Request This Skill</a>
+            <div class="skill-actions">
+                <a href="/order/{{ skill.id }}" class="btn">Place an order</a>
+            <div>
         {% endif %}
     </div>
 {% endblock %}

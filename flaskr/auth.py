@@ -83,6 +83,10 @@ def update_token(hashed_token, expiry, email):
 
 @bp.route("/register", methods=['GET', 'POST'])
 def register():
+    # clear any existing flash messages on GET
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+
     if request.method == 'POST':
         email = request.form['username']
         password1 = request.form['password1']
@@ -112,6 +116,10 @@ def register():
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
+    # clear any existing flash messages on GET
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -140,6 +148,10 @@ def logout():
 
 @bp.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
+    # clear any existing flash messages on GET
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+
     if request.method == 'POST':
         email = request.form['email']
         user = get_user(email)
