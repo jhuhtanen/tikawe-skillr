@@ -159,6 +159,15 @@ def skill_detail(skill_id):
     return render_template('skills/skill_detail.html', skill=skill)
 
 
+@bp.route('/skill/user_skills')
+@login_required
+def user_skills():
+    user_id = session['user_id']
+    skills = get_skills_by_user(user_id)
+
+    return render_template('skills/user_skills.html', skills=skills)
+
+
 def add_skill(title, description, is_free, price, subcategory_id, user_id):
     db.execute(
         "INSERT INTO skills (title, description, is_free, price, user_id) VALUES (?, ?, ?, ?, ?)",
@@ -262,3 +271,13 @@ def delete_existing_skill_images(skill_id):
 def check_skill_ownership(skill):
     if skill["user_id"] != session["user_id"]:
         abort(403)
+
+
+def get_skills_by_user(user_id):
+    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, 
+        (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path 
+        FROM skills s 
+        JOIN users u ON s.user_id = u.id 
+        WHERE u.id = ?"""
+    result = db.query(sql, [user_id])
+    return result

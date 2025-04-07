@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Orders:</h2>
+    <div class="skill-grid">
+        {% for order in orders %}
+            {% include "orders/_order_card.html" %}
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,24 @@
+.profile-container {
+    max-width: 800px;
+    margin: auto;
+    padding: 2rem;
+}
+
+.profile-section {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 1rem;
+}
+
+.profile-section h3 {
+    margin-bottom: 0.5rem;
+}
+
+.stats-list {
+    list-style: none;
+    padding: 0;
+}
+
+.stats-list li {
+    margin: 0.25rem 0;
+}

@@ -1,0 +1,13 @@
+<div class="skill-card">
+    <div class="skill-info">
+        <h2>{{ order.title }}</h2>
+        <p>by: {{ order.username }}</p>
+        <p>{{ order.description }}</p>
+        {% if order.is_free %}
+            <p class="price">Free</p>
+        {% else %}
+            <p class="price">{{ order.price }} €</p>
+        {% endif %}
+        <p>Additional: {{ order.additional_information }}</p>
+    </div>
+</div>
