@@ -1,6 +1,6 @@
 from sys import stderr
 
-from flaskr.email import EmailInterface
+from flaskr.email_interface import EmailInterface
 
 
 class MockEmailInterface(EmailInterface):

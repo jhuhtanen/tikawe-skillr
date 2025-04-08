@@ -11,6 +11,32 @@ from flaskr.auth import login_required
 bp = Blueprint("skill", __name__, url_prefix="/skills")
 
 
+class SkillForm:
+    def __init__(self, form_data=None, skill=None):
+        self.errors = []
+
+        self.title = (form_data.get("title") if form_data else skill["title"] if skill else "").strip()
+        self.price = form_data.get("price") if form_data else str(skill["price"]) if skill else None
+        self.description = (form_data.get("description") if form_data else skill["description"] if skill else "").strip()
+        self.is_free = (form_data.get("is_free") == "1" if form_data else bool(skill["is_free"]) if skill else False)
+        self.category = (form_data.get("category") if form_data else str(skill["category"]) if skill else "").strip()
+        self.subcategory = (form_data.get("subcategory") if form_data else str(skill["subcategory"]) if skill else "").strip()
+
+        if self.is_free:
+            self.price = None
+
+    def validate(self):
+        self.errors.clear()
+        if not self.title:
+            self.errors.append("Title is required.")
+        if not self.description:
+            self.errors.append("Description is required.")
+        if not self.is_free and (self.price is None or not self.price.isdigit() or int(self.price) < 1):
+            self.errors.append("Price must be 1 or greater!")
+        if not self.subcategory:
+            self.errors.append("Subcategory is required.")
+        return bool(self.errors)
+
 # Create a new skill listing
 @bp.route("/create", methods=["GET", "POST"])
 @login_required
@@ -18,22 +44,17 @@ def create_skill():
     if "categories" not in session:
         session["categories"] = build_categories()
 
-    selected_category = request.args.get("category", None)
-    selected_subcategory = request.args.get("subcategory", None)
+    skill_form = SkillForm(request.form)
+    if request.method == "GET":
+        skill_form.category = request.args.get("category", None)
+        skill_form.subcategory = request.args.get("subcategory", None)
 
     if request.method == "POST":
-        title = request.form["title"]
-        description = request.form["description"]
-        #category_id = request.form["category"]
-        subcategory_id = request.form["subcategory"]
-        is_free = request.form.get("is_free") == "on"
-        price = request.form["price"] if not is_free else None
         user_id = session['user_id']
+        has_errors = skill_form.validate()
 
-        if not title:
-            flash("Title is required.")
-        else:
-            add_skill(title, description, is_free, price, subcategory_id, user_id)
+        if not has_errors:
+            add_skill(skill_form.title, skill_form.description, skill_form.is_free, skill_form.price, skill_form.subcategory, user_id)
             skill_id = g.last_insert_id
 
             base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -52,11 +73,11 @@ def create_skill():
             return redirect(url_for("skill.list_skills"))
 
     return render_template("skills/create.html",
-                           form_mode='create', form_action=url_for('skill.create_skill'),
+                           form_mode='create',
+                           form_action=url_for('skill.create_skill'),
                            button_text="Create Skill", skill=None,
                            categories=session["categories"],
-                           selected_category=selected_category if selected_category else None,
-                           selected_subcategory=selected_subcategory if selected_subcategory else None)
+                           form=skill_form)
 
 
 # Update an existing skill
@@ -72,49 +93,48 @@ def edit_skill(skill_id):
     if "categories" not in session:
         session["categories"] = build_categories()
 
-    selected_category = request.args.get("category", str(skill["category_id"]))
-    selected_subcategory = request.args.get("subcategory", skill["category_value"])
+    skill_form = SkillForm(request.form, skill)
 
-    print(f"selected subcategory {selected_subcategory}", file=sys.stderr)
+    if request.method == "GET":
+        skill_form.category = request.args.get("category", str(skill["category"]))
+        skill_form.subcategory = request.args.get("subcategory", str(skill["subcategory"]))
+
 
     if skill is None:
         flash("Skill not found.")
         return redirect(url_for("skill.list_skills"))
 
     if request.method == "POST":
-        title = request.form["title"]
-        description = request.form["description"]
-        subcategory_id = request.form["subcategory"]
-        is_free = request.form.get("is_free") == "on"
-        price = request.form["price"] if not is_free else None
+        skill_form = SkillForm(request.form, skill)
+        has_errors = skill_form.validate()
 
-        update_skill(skill_id, title, description, is_free, price, subcategory_id)
+        if not has_errors:
+            update_skill(skill_id, skill_form.title, skill_form.description, skill_form.is_free, skill_form.price, skill_form.subcategory)
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        upload_folder = os.path.join(base_dir, current_app.config['UPLOAD_FOLDER'])
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            upload_folder = os.path.join(base_dir, current_app.config['UPLOAD_FOLDER'])
 
-        # Handle new image uploads
-        images = request.files.getlist("images")
+            # Handle new image uploads
+            images = request.files.getlist("images")
 
-        if images and any(img.filename for img in images):
-            delete_existing_skill_images(skill_id)
+            if images and any(img.filename for img in images):
+                delete_existing_skill_images(skill_id)
 
-        for img in images[:3]:
-            if img.filename:
-                filename = secure_filename(f"skill_{skill_id}_{img.filename}")
-                file_path2 = os.path.join(upload_folder, filename)
-                img.save(file_path2)
-                add_skill_image(skill_id, f"uploads/{filename}")
+            for img in images[:3]:
+                if img.filename:
+                    filename = secure_filename(f"skill_{skill_id}_{img.filename}")
+                    file_path2 = os.path.join(upload_folder, filename)
+                    img.save(file_path2)
+                    add_skill_image(skill_id, f"uploads/{filename}")
 
-        flash("Skill updated!")
-        return redirect(url_for("skill.list_skills"))
-    return render_template("skills/create.html", form_mode='update',
+            flash("Skill updated!")
+            return redirect(url_for("skill.list_skills"))
+    return render_template("skills/create.html",
+                           form_mode='update',
                            form_action=url_for('skill.edit_skill', skill_id=skill_id),
                            button_text="Update Skill", skill=skill,
                            categories=session["categories"],
-                           selected_category=selected_category if selected_category else None,
-                           selected_subcategory=selected_subcategory if selected_subcategory else None
-                           )
+                           form=skill_form)
 
 
 @bp.route("/skill/<int:skill_id>/confirm_delete", methods=["GET"])
@@ -191,8 +211,8 @@ def get_skill(skill_id):
     result = db.query(
         "SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, "
         "(SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path, "
-        "c.title AS category, cv.value AS category_value, cv.category_id as category_id "
-        "FROM skills s "
+        "c.title AS category_title, cv.value AS category_value, cv.id as subcategory, cv.category_id as category "
+        "FROM skills s, skill_categories sc "
         "JOIN users u ON s.user_id = u.id "
         "JOIN category_values cv ON sc.category_value_id = cv.id "
         "JOIN categories c ON cv.category_id = c.id "
@@ -244,11 +264,11 @@ def build_categories():
 
     category_dict = {}
     for row in categories_data:
-        cat_id = row["category_id"]
+        cat_id = str(row["category_id"])
         if cat_id not in category_dict:
             category_dict[cat_id] = {"title": row["category_title"], "values": []}
         if row["value_id"]:  # Avoid None values if no subcategories exist
-            category_dict[cat_id]["values"].append({"id": row["value_id"], "value": row["value_name"]})
+            category_dict[cat_id]["values"].append({"id": str(row["value_id"]), "value": row["value_name"]})
 
     return category_dict
 
