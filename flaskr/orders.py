@@ -13,7 +13,7 @@ bp = Blueprint("orders", __name__, url_prefix="/orders")
 @login_required
 def list_owned_orders():
     user_id = session['user_id']
-    orders = get_owned_orders(user_id)
+    orders = get_orders_made_by_user(user_id)
 
     return render_template('orders/list.html', orders=orders, view_type="made")
 
@@ -22,7 +22,7 @@ def list_owned_orders():
 @login_required
 def list_customer_made():
     user_id = session['user_id']
-    orders = get_orders(user_id)
+    orders = get_orders_made_to_user(user_id)
 
     return render_template('orders/list.html', orders=orders, view_type="received")
 
@@ -44,7 +44,6 @@ def add_order(skill_id):
 def confirm_order(skill_id):
     skill = get_skill(skill_id)
     return render_template("orders/confirm.html", skill=skill)
-
 
 
 @bp.route('/order/<int:order_id>')
@@ -82,18 +81,20 @@ def complete_order(order_id):
     return redirect(url_for("orders.list_customer_made"))
 
 
-def get_owned_orders(user_id):
+def get_orders_made_by_user(user_id):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
-            o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, o.customer_id as owner_id
-            FROM orders o, skills s, users u
-            WHERE o.skill_id = s.id AND s.user_id = u.id AND  
-            o.customer_id = ?  
+            o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, 
+            s.user_id as owner_id, u2.username as customer_name
+            FROM orders o, skills s, users u, users u2
+            WHERE o.skill_id = s.id AND s.user_id = u.id
+            AND o.customer_id = u2.id
+            AND o.customer_id = ?  
             ORDER BY o.is_completed"""
     result = db.query(sql, [user_id])
     return result
 
 
-def get_orders(user_id):
+def get_orders_made_to_user(user_id):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
             o.order_placed, o.order_completed, s.title, s.description, s.price, u.username,
             u.id as owner_id, u2.username as customer_name
@@ -114,6 +115,7 @@ def create_order(skill_id, customer_id, additional_commentary):
         [skill_id, customer_id, 0, today_str, additional_commentary]
     )
 
+
 def get_order(order_id):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
             o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, s.user_id as owner_id
@@ -131,9 +133,11 @@ def mark_order_completed(order_id):
             WHERE id = ?"""
     db.execute(sql, [today_str, order_id])
 
+
 def check_order_ownership(order):
     if order["owner_id"] != session["user_id"]:
         abort(403)
+
 
 def get_time_now_formatted():
     return datetime.today().strftime('%Y-%m-%d')

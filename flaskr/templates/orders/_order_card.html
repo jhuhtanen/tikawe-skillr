@@ -1,6 +1,8 @@
 <div class="skill-card">
     <div class="skill-info">
-        <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">
+        {% if order.owner_id == session["user_id"] %}
+            <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">
+        {% endif %}
             <h2 title="{{ order.title }}">{{ order.title }}</h2>
             <div>requested by: {{ order.customer_name }}</div>
             {% if order.is_free %}
@@ -15,7 +17,9 @@
             {% else %}
                 <p class="price"><strong>Open</strong></p>
             {% endif %}
-        </div>
-        </a>
+            </div>
+        {% if order.owner_id == session["user_id"] %}
+            </a>
+        {% endif %}
     </div>
 </div>
