@@ -1,0 +1,21 @@
+<div class="skill-card">
+    <div class="skill-info">
+        <a href="{{ url_for('orders.order_detail', order_id=order.id) }}">
+            <h2 title="{{ order.title }}">{{ order.title }}</h2>
+            <div>requested by: {{ order.customer_name }}</div>
+            {% if order.is_free %}
+                <p class="price"><strong>Price:</strong> Free</p>
+            {% else %}
+                <p class="price"><strong>Price:</strong> {{ order.price }} €</p>
+            {% endif %}
+            <p><strong>Status:</strong></p>
+            <div>
+            {% if order.is_completed %}
+                <p class="price"><strong>Completed</strong></p>
+            {% else %}
+                <p class="price"><strong>Open</strong></p>
+            {% endif %}
+        </div>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block title %}Your listings{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h2>Your listings:</h2>
+    <div class="skill-grid">
+        {% for skill in skills %}
+            {% include "skills/_skill_card.html" %}
+        {% endfor %}
+    </div>
+{% endblock %}

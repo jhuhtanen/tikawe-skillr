@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block title %} Confirm Complete{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+<h3>Confirm complete</h3>
+<p>You are about to complete the order. Are you sure?</p>
+<form action="{{ url_for('orders.complete_order', order_id=order.id) }}" method="post">
+    <input type="submit" name="confirm" class="btn" value="Confirm complete">
+</form>
+<p>
+  <a href="{{ url_for('orders.list_customer_made') }}">Back to orders</a>
+</p>
+{% endblock %}

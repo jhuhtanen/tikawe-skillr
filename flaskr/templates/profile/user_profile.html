@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='user_profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <h2>Welcome, {{ session["username"] }}</h2>
+
+    <section class="profile-section">
+        <h3>Your Listings</h3>
+        <p><a href="{{ url_for('skill.user_skills') }}">View your skill listings</a></p>
+    </section>
+
+    <section class="profile-section">
+        <h3>Orders you have made</h3>
+        <p><a href="{{ url_for('orders.list_owned_orders') }}">View your own orders</a> ({{ stats.open_orders_buyer + stats.completed_orders_buyer }} total)</p>
+    </section>
+
+    <section class="profile-section">
+        <h3>Orders made for you</h3>
+        <p><a href="{{ url_for('orders.list_customer_made') }}">View orders</a> ({{ stats.open_orders_seller + stats.completed_orders_seller }} total)</p>
+    </section>
+
+    <section class="profile-section">
+        <h3>Your Reviews</h3>
+        <p><a href="{{ url_for('profile.reviews') }}">View your reviews</a> ({{ stats.total_reviews }} total)</p>
+    </section>
+
+    <section class="profile-section">
+        <h3>Statistics</h3>
+        <ul class="stats-list">
+            <li><strong>Open Orders (as customer):</strong> {{ stats.open_orders_buyer }}</li>
+            <li><strong>Completed Orders (as customer):</strong> {{ stats.completed_orders_buyer }}</li>
+            <li><strong>Open Orders (as seller):</strong> {{ stats.open_orders_seller }}</li>
+            <li><strong>Completed Orders (as seller):</strong> {{ stats.completed_orders_seller }}</li>
+            <li><strong>Total Reviews (as seller):</strong> {{ stats.total_reviews }}</li>
+            <li><strong>Average Review Score (as seller):</strong> {{ stats.avg_score }}/5.0</li>
+        </ul>
+    </section>
+</div>
+{% endblock %}

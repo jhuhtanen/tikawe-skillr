@@ -56,3 +56,13 @@ CREATE TABLE skill_images (
     skill_id INTEGER REFERENCES skills,
     image_path TEXT
 );
+
+CREATE TABLE orders (
+    id INTEGER PRIMARY KEY,
+    skill_id INTEGER REFERENCES skills,
+    customer_id INTEGER REFERENCES users,
+    is_completed BOOLEAN NOT NULL CHECK (is_completed IN (0, 1)),
+    order_placed TEXT NOT NULL,
+    order_completed TEXT,
+    additional_information TEXT
+);

@@ -32,7 +32,7 @@
             </div>
         {% else %}
             <div class="skill-actions">
-                <a href="/order/{{ skill.id }}" class="btn">Place an order</a>
+                <a href="{{ url_for('orders.confirm_order', skill_id=skill.id) }}" class="btn">Place an order</a>
             <div>
         {% endif %}
     </div>

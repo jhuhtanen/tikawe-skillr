@@ -1,0 +1,27 @@
+{% extends 'layout.html' %}
+
+{% block title %} Confirm order {% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2>Confirm order:</h2>
+<h3>You are about to make an order for:</h3>
+<p>{{ skill.title }} </p>
+<p>From: {{skill.username}}</p>
+{% if skill.price %} <p>{{ skill.price }} € </p> {% endif %}
+<div class="form-container">
+<form action="{{ url_for('orders.add_order', skill_id=skill.id) }}" method="post">
+        <div class="form-group">
+            <label for="additional_information">Additional information:</label>
+            <textarea id="additional_information" name="additional_information" maxlength="2048"> </textarea>
+        </div>
+    <input type="submit" name="remove" class="btn" value="Make order">
+</form>
+</div>
+<p>
+  <a href="{{ url_for('skill.list_skills') }}">Back</a>
+</p>
+{% endblock %}

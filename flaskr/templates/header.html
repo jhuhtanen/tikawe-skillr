@@ -1,7 +1,7 @@
 <header>
     <nav>
         <div class="logo">
-            <a href="{{ url_for('main.index') }}" style="color: white; text-decoration: none;">Skill Exchange</a>
+            <a href="{{ url_for('main.index') }}" style="color: white; text-decoration: none;">Skillr</a>
         </div>
          <ul class="nav-menu">
             <li><a href="{{ url_for('main.index') }}">Home</a></li>
@@ -9,6 +9,7 @@
             <li><a href="{{ url_for('skill.create_skill') }}">Post a Skill</a></li>
              <li><a href="{{ url_for('search.find_skills_page') }}">Search</a></li>
             {% if session["user_id"] %}
+                <li><a href="{{ url_for('profile.index') }}">Profile</a></li>
                 <li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
             {% else %}
                 <li><a href="{{ url_for('auth.login') }}">Login</a></li>

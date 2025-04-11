@@ -1,0 +1,9 @@
+<h2>
+    {% if view_type == 'received' %}
+        Orders made for you:
+    {% elif view_type == 'made' %}
+        Orders you have made:
+    {% else %}
+        Orders:
+    {% endif %}
+</h2>

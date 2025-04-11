@@ -1,4 +1,7 @@
 <div class="skill-card">
+    {% if skill.is_owned %}
+        <img src="{{ url_for('static', filename='my-skill.png') }}" class="badge" alt="My skill">
+    {% endif %}
     <a href="{{ url_for('skill.skill_detail', skill_id=skill.id) }}">
         {% if skill.image_path %}
             <img src="{{ url_for('static', filename=skill.image_path) }}" alt="{{ skill.title }}">
