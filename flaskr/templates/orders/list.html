@@ -7,10 +7,14 @@
 {% endblock %}
 
 {% block content %}
-    <h2>Orders:</h2>
+    {% include 'orders/_orders_heading.html' %}
     <div class="skill-grid">
         {% for order in orders %}
             {% include "orders/_order_card.html" %}
         {% endfor %}
     </div>
+    {% if not orders %}
+    <p>No orders found!</p>
+    <a href="{{ url_for('profile.index') }}">To profile</a>
+    {% endif %}
 {% endblock %}

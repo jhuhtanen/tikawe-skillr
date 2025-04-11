@@ -212,7 +212,7 @@ def get_skill(skill_id):
         "SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, "
         "(SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path, "
         "c.title AS category_title, cv.value AS category_value, cv.id as subcategory, cv.category_id as category "
-        "FROM skills s, skill_categories sc "
+        "FROM skills s "
         "JOIN users u ON s.user_id = u.id "
         "JOIN category_values cv ON sc.category_value_id = cv.id "
         "JOIN categories c ON cv.category_id = c.id "
@@ -249,10 +249,14 @@ def delete_skill_images(skill_id):
 
 
 def get_all_skills():
+    user_id = session["user_id"]
     return db.query("SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, "
-                    "(SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path "
+                    "(SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path, "
+                    "CASE WHEN s.user_id = ? THEN 1 "
+                    "ELSE 0 "
+                    "END AS is_owned "
                     "FROM skills s "
-                    "JOIN users u ON s.user_id = u.id")
+                    "JOIN users u ON s.user_id = u.id", [user_id])
 
 
 def build_categories():
@@ -295,7 +299,8 @@ def check_skill_ownership(skill):
 
 def get_skills_by_user(user_id):
     sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, 
-        (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path 
+        (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
+        1 as is_owned
         FROM skills s 
         JOIN users u ON s.user_id = u.id 
         WHERE u.id = ?"""

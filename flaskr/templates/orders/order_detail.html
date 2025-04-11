@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block title %}Order Details{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="skill-detail">
+        <h2>{{ order.title }}</h2>
+        <p>{{ order.description }}</p>
+
+        {% if order.is_free %}
+            <p class="price"><strong>Price:</strong> Free</p>
+        {% else %}
+            <p class="price"><strong>Price:</strong> {{ order.price }} €</p>
+        {% endif %}
+
+        <p>{{ order.additional_information }}</p>
+
+        {% if not order.is_completed %}
+            <div class="skill-actions">
+                <a href="{{ url_for('orders.confirm_complete_order', order_id=order.id) }}" class="btn">Complete</a>
+            </div>
+        {% else %}
+            <div class="skill-actions">
+                <a href="{{ url_for('orders.list_customer_made') }}" class="btn">Back to orders</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
