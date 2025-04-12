@@ -112,7 +112,7 @@ this dependency.
 
 ===
 
-## Delivery on 30.04.2025
+## Delivery on 30.03.2025
 * Current functionality:
 
 User can register and loging to the site. They can request forgotten password link and reset password using it.
@@ -122,3 +122,14 @@ User can search skills by using text search from title or description.
 NOTE: In order for the app to work the config.py from project root needs to be copied to instance folder.
 I couldn't figure out why it needs to be copied there yet but application uses config keys and instance folder is
 by default on gitignore because it's instance level data.
+
+## Delivery on 13.04.2025
+* Current functionality:
+
+User can make an order for a skill someone else has listed.
+User can access a profile page that has the following functionlity:
+User can complete an order someone else made for their skill. (Out of scope how the communication is handled or managed, but idea is that there's email for every user)
+* List users skill listing (see their own skills)
+* List orders user have made for someone else
+* List orders everyone else has made for one of the skills user have
+* Show statistics 
