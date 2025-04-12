@@ -1,0 +1,21 @@
+{% if pagination.total_pages > 1 %}
+<div class="pagination">
+    {% if pagination.has_previous_range %}
+        <a href="{{ pagination.url_for_page(1) }}">&laquo;&laquo;</a>
+        <a href="{{ pagination.url_for_page(pagination.previous_range_page) }}">&laquo;</a>
+    {% endif %}
+
+    {% for p in pagination.page_range %}
+        {% if p == pagination.current_page %}
+            <span class="current">{{ p }}</span>
+        {% else %}
+            <a href="{{ pagination.url_for_page(p) }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next_range %}
+        <a href="{{ pagination.url_for_page(pagination.next_range_page) }}">&raquo;</a>
+        <a href="{{ pagination.url_for_page(pagination.total_pages) }}">&raquo;&raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
