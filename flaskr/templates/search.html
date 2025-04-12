@@ -26,6 +26,7 @@
     {% include "skills/_skill_card.html" %}
   {% endfor %}
 </div>
+{% include "common/_pagination.html" %}
 {% else %}
 <p>No skills found matching "{{ query }}".</p>
 {% endif %}

@@ -1,8 +1,7 @@
 import os
-import profile
 
 from flask import Flask, session, redirect, url_for
-from flaskr import db, auth, main, skills, image_upload, search, user_profile, orders
+from flaskr import db, auth, main, skills, image_upload, search, user_profile, orders, create_mock_data
 
 
 def create_app(test_config=None):
@@ -24,6 +23,7 @@ def create_app(test_config=None):
 
     # initialize the database
     db.init_app(app)
+    create_mock_data.init_app(app)
     app.register_blueprint(auth.bp)
     app.register_blueprint(main.bp)
     app.register_blueprint(skills.bp)

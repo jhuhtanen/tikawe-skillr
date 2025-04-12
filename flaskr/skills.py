@@ -1,5 +1,6 @@
+import math
 import os
-import sys
+from sys import stderr
 
 from flask import Blueprint, request, render_template, redirect, url_for, flash, g, session, current_app, abort
 
@@ -7,6 +8,7 @@ from werkzeug.utils import secure_filename
 
 from flaskr import db
 from flaskr.auth import login_required
+from flaskr.pagination import Pagination
 
 bp = Blueprint("skill", __name__, url_prefix="/skills")
 
@@ -36,6 +38,7 @@ class SkillForm:
         if not self.subcategory:
             self.errors.append("Subcategory is required.")
         return bool(self.errors)
+
 
 # Create a new skill listing
 @bp.route("/create", methods=["GET", "POST"])
@@ -99,7 +102,6 @@ def edit_skill(skill_id):
         skill_form.category = request.args.get("category", str(skill["category"]))
         skill_form.subcategory = request.args.get("subcategory", str(skill["subcategory"]))
 
-
     if skill is None:
         flash("Skill not found.")
         return redirect(url_for("skill.list_skills"))
@@ -162,10 +164,16 @@ def delete_skill(skill_id):
 
 # List all skills
 @bp.route("/")
+@bp.route("/<int:page>")
 @login_required
-def list_skills():
-    skills = get_all_skills()
-    return render_template("skills/list.html", skills=skills)
+def list_skills(page=1):
+    page_size = 10
+    skills_count = get_skills_count()
+
+    pagination = Pagination(current_page=page, total_items=skills_count,
+                            per_page=page_size, endpoint="skill.list_skills", extra_args={})
+    skills = get_all_skills(page, page_size)
+    return render_template("skills/list.html", skills=skills, pagination=pagination)
 
 
 @bp.route('/skill/<int:skill_id>')
@@ -259,6 +267,22 @@ def get_all_skills():
                     "JOIN users u ON s.user_id = u.id", [user_id])
 
 
+def get_all_skills(page, page_size):
+    user_id = session["user_id"]
+    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, 
+                (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
+                CASE WHEN s.user_id = ? THEN 1
+                ELSE 0
+                END AS is_owned
+                FROM skills s
+                JOIN users u ON s.user_id = u.id
+                LIMIT ? OFFSET ?"""
+
+    limit = page_size
+    offset = page_size * (page - 1)
+    return db.query(sql, [user_id, limit, offset])
+
+
 def build_categories():
     categories_data = db.query(
         """SELECT c.id AS category_id, c.title AS category_title, cv.id AS value_id, cv.value AS value_name
@@ -306,3 +330,9 @@ def get_skills_by_user(user_id):
         WHERE u.id = ?"""
     result = db.query(sql, [user_id])
     return result
+
+
+def get_skills_count():
+    sql = "SELECT COUNT(s.id) as cnt from skills s"
+    result = db.query(sql)
+    return int(result[0]["cnt"]) if result else 0
