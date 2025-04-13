@@ -1,0 +1,40 @@
+.review-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+}
+
+.review-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.review-card {
+  padding: 10px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+}
+
+.review-rating {
+  font-size: 1.4em;
+  color: #9c2a70;
+  margin-bottom: 5px;
+}
+
+.review-comment {
+  font-style: italic;
+  margin-bottom: 5px;
+}
+
+.review-author {
+  font-size: 0.9em;
+  color: #555;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #ddd;
+  margin: 10px 0;
+}

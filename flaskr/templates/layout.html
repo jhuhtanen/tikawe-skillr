@@ -7,14 +7,12 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-
-    {% include 'header.html' %}  <!-- 🏗 Shared navigation bar -->
+    {% include 'header.html' %}
 
     <main>
-        {% block content %}{% endblock %}  <!-- 🎯 Dynamic content -->
+        {% block content %}{% endblock %}
     </main>
 
-    {% include 'footer.html' %}  <!-- 🔻 Shared footer -->
-
+    {% include 'footer.html' %}
 </body>
 </html>

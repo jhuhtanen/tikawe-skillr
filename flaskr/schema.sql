@@ -28,7 +28,7 @@ CREATE TABLE skills (
 
 CREATE TABLE reviews (
     id INTEGER PRIMARY KEY,
-    skill_id INTEGER REFERENCES skills,
+    order_id INTEGER REFERENCES orders,
     user_id INTEGER REFERENCES users,
     rating INTEGER NOT NULL CHECK (rating IN (0,1,2,3,4,5)),
     description TEXT

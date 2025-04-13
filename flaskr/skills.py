@@ -188,12 +188,18 @@ def skill_detail(skill_id):
 
 
 @bp.route('/skill/user_skills')
+@bp.route("/skill/user_skills/<int:page>")
 @login_required
-def user_skills():
+def user_skills(page=1):
     user_id = session['user_id']
-    skills = get_skills_by_user(user_id)
+    page_size = 10
+    skills = get_skills_by_user(user_id, page, page_size)
+    skills_count = get_skills_count_by_user(user_id)
 
-    return render_template('skills/user_skills.html', skills=skills)
+    pagination = Pagination(current_page=page, total_items=skills_count,
+                            per_page=page_size, endpoint="skill.user_skills", extra_args={})
+
+    return render_template('skills/user_skills.html', skills=skills, pagination=pagination)
 
 
 def add_skill(title, description, is_free, price, subcategory_id, user_id):
@@ -321,18 +327,30 @@ def check_skill_ownership(skill):
         abort(403)
 
 
-def get_skills_by_user(user_id):
+def get_skills_by_user(user_id, page, page_size):
     sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, 
         (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
         1 as is_owned
         FROM skills s 
         JOIN users u ON s.user_id = u.id 
-        WHERE u.id = ?"""
-    result = db.query(sql, [user_id])
+        WHERE u.id = ?
+        LIMIT ? OFFSET ?"""
+
+    limit = page_size
+    offset = page_size * (page - 1)
+    result = db.query(sql, [user_id, limit, offset])
     return result
 
 
 def get_skills_count():
     sql = "SELECT COUNT(s.id) as cnt from skills s"
     result = db.query(sql)
+    return int(result[0]["cnt"]) if result else 0
+
+
+def get_skills_count_by_user(user_id):
+    sql = """SELECT COUNT(s.id) as cnt 
+            FROM skills s
+            WHERE s.user_id = ?"""
+    result = db.query(sql, [user_id])
     return int(result[0]["cnt"]) if result else 0

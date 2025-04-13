@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+
+{% block title %}Your Reviews{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='reviews.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="review-container">
+  <h2>Your Reviews</h2>
+
+  {% if reviews %}
+    <div class="review-list">
+      {% for review in reviews %}
+        <div class="review-card">
+          <div class="review-rating">
+            {% for star in range(review.rating) %}
+              ★
+            {% endfor %}
+            {% for star in range(5 - review.rating) %}
+              ☆
+            {% endfor %}
+          </div>
+          <div class="review-comment">
+            <p>{{ review.description or "No comment provided." }}</p>
+          </div>
+          <div class="review-author">
+            <strong>From:</strong> {{ review.customer_name }}
+          </div>
+        </div>
+        <hr>
+      {% endfor %}
+    </div>
+
+    {% include "common/_pagination.html" %}
+  {% else %}
+    <p>No reviews yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

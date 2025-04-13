@@ -1,30 +1,44 @@
 from datetime import datetime
+from sys import stderr
 
 from flask import Blueprint, request, render_template, session, flash, redirect, url_for, abort
 
 from flaskr import db
 from flaskr.auth import login_required
+from flaskr.pagination import Pagination
 from flaskr.skills import get_skill
 
 bp = Blueprint("orders", __name__, url_prefix="/orders")
 
 
 @bp.route('/list_owned')
+@bp.route("/list_owned/<int:page>")
 @login_required
-def list_owned_orders():
+def list_owned_orders(page=1):
     user_id = session['user_id']
-    orders = get_orders_made_by_user(user_id)
+    page_size = 10
+    orders = get_orders_made_by_user(user_id, page, page_size)
+    orders_count = get_orders_count_made_by_user(user_id)
 
-    return render_template('orders/list.html', orders=orders, view_type="made")
+    pagination = Pagination(current_page=page, total_items=orders_count,
+                            per_page=page_size, endpoint="orders.list_owned", extra_args={})
+
+    return render_template('orders/list.html', orders=orders, view_type="made", pagination=pagination)
 
 
 @bp.route('/list_customer_made')
+@bp.route("/list_customer_made/<int:page>")
 @login_required
-def list_customer_made():
+def list_customer_made(page=1):
     user_id = session['user_id']
-    orders = get_orders_made_to_user(user_id)
+    page_size = 10
+    orders = get_orders_made_to_user(user_id, page, page_size)
+    orders_count = get_orders_count_made_to_user(user_id)
 
-    return render_template('orders/list.html', orders=orders, view_type="received")
+    pagination = Pagination(current_page=page, total_items=orders_count,
+                            per_page=page_size, endpoint="orders.list_customer_made", extra_args={})
+
+    return render_template('orders/list.html', orders=orders, view_type="received", pagination=pagination)
 
 
 @bp.route("/add/<int:skill_id>", methods=["POST"])
@@ -77,24 +91,67 @@ def complete_order(order_id):
     check_order_ownership(order)
 
     mark_order_completed(order["id"])
-    #flash("Skill and images deleted!")
     return redirect(url_for("orders.list_customer_made"))
 
 
-def get_orders_made_by_user(user_id):
+@bp.route("/<int:order_id>/review", methods=["GET", "POST"])
+@login_required
+def review_order(order_id):
+    order = get_order(order_id)
+    user_id = session['user_id']
+    # check the requester actually owns this order
+    check_reviewer_is_customer(order, user_id)
+
+    if request.method == "POST":
+        rating = int(request.form["rating"])
+        rating = max(min(rating, 5), 1)
+        comment = request.form["comment"]
+        create_review(order_id, user_id, rating, comment)
+
+    return render_template("orders/review.html", order=order)
+
+
+@bp.route('/reviews')
+@bp.route("/reviews/<int:page>")
+@login_required
+def list_reviews(page=1):
+    user_id = session['user_id']
+    page_size = 20
+    reviews = get_reviews(user_id, page, page_size)
+    review_count = get_review_count(user_id)
+
+    pagination = Pagination(current_page=page, total_items=review_count,
+                            per_page=page_size, endpoint="orders.list_reviews", extra_args={})
+
+    return render_template('orders/reviews.html', reviews=reviews, pagination=pagination)
+
+
+def get_orders_made_by_user(user_id, page, page_size):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
             o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, 
-            s.user_id as owner_id, u2.username as customer_name
+            s.user_id as owner_id, u2.username as customer_name, r.rating
             FROM orders o, skills s, users u, users u2
+            LEFT JOIN reviews r ON r.order_id = o.id AND r.user_id = o.customer_id
             WHERE o.skill_id = s.id AND s.user_id = u.id
             AND o.customer_id = u2.id
             AND o.customer_id = ?  
-            ORDER BY o.is_completed"""
-    result = db.query(sql, [user_id])
+            ORDER BY o.is_completed
+            LIMIT ? OFFSET ?"""
+    limit = page_size
+    offset = page_size * (page - 1)
+    result = db.query(sql, [user_id, limit, offset])
     return result
 
 
-def get_orders_made_to_user(user_id):
+def get_orders_count_made_by_user(user_id):
+    sql = """SELECT count(o.id) as cnt
+            FROM orders o
+            WHERE o.customer_id = ? """
+    result = db.query(sql, [user_id])
+    return int(result[0]["cnt"]) if result else 0
+
+
+def get_orders_made_to_user(user_id, page, page_size):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
             o.order_placed, o.order_completed, s.title, s.description, s.price, u.username,
             u.id as owner_id, u2.username as customer_name
@@ -102,9 +159,21 @@ def get_orders_made_to_user(user_id):
             WHERE o.skill_id = s.id AND s.user_id = u.id
             AND o.customer_id = u2.id
             AND u.id = ?
-            ORDER BY o.is_completed"""
-    result = db.query(sql, [user_id])
+            ORDER BY o.is_completed
+            LIMIT ? OFFSET ?"""
+    limit = page_size
+    offset = page_size * (page - 1)
+    result = db.query(sql, [user_id, limit, offset])
     return result
+
+
+def get_orders_count_made_to_user(user_id):
+    sql = """SELECT count(o.id) as cnt
+            FROM orders o, skills s, users u
+            WHERE o.skill_id = s.id AND s.user_id = u.id
+            AND u.id = ?"""
+    result = db.query(sql, [user_id])
+    return int(result[0]["cnt"]) if result else 0
 
 
 def create_order(skill_id, customer_id, additional_commentary):
@@ -134,8 +203,45 @@ def mark_order_completed(order_id):
     db.execute(sql, [today_str, order_id])
 
 
+def create_review(order_id, user_id, rating, comment):
+    db.execute(
+        "INSERT INTO reviews (order_id, user_id, rating, description) "
+        "VALUES (?, ?, ?, ?)",
+        [order_id, user_id, rating, comment]
+    )
+
+
+def get_reviews(user_id, page, page_size):
+    sql = """SELECT r.order_id, r.user_id, r.rating, r.description, u.username as customer_name
+            FROM reviews r, orders o, skills s, users u
+            WHERE r.order_id = o.id AND o.skill_id = s.id
+            AND r.user_id = u.id
+            AND s.user_id = ?
+            ORDER BY r.rating DESC
+            LIMIT ? OFFSET ?"""
+    limit = page_size
+    offset = page_size * (page - 1)
+
+    result = db.query(sql, [user_id, limit, offset])
+    return result
+
+
+def get_review_count(user_id):
+    sql = """SELECT count(r.order_id) as cnt
+            FROM reviews r, orders o, skills s
+            WHERE r.order_id = o.id AND o.skill_id = s.id
+            AND s.user_id = ?"""
+    result = db.query(sql, [user_id])
+    return int(result[0]["cnt"]) if result else 0
+
+
 def check_order_ownership(order):
     if order["owner_id"] != session["user_id"]:
+        abort(403)
+
+
+def check_reviewer_is_customer(order, customer_id):
+    if order["customer_id"] != customer_id:
         abort(403)
 
 

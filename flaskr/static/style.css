@@ -15,18 +15,19 @@ html, body {
 }
 
 main {
-    flex: 1; /* Allows main to take up remaining space */
-    overflow-y: auto; /* Enables scrolling inside main if needed */
-    padding: 20px; /* Ensures content doesn't touch edges */
+  padding: 100px 20px 160px;
+  overflow-y: auto;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 header, footer {
     flex-shrink: 0; /* Prevents them from squishing */
     width: 100%;
-    background-color: #f8f8f8; /* Just to differentiate */
+    background-color: #f8f8f8;
     padding: 10px 0;
     text-align: center;
-    position: relative; /* Ensures they don’t overlay */
+    position: relative;
 }
 
 body {

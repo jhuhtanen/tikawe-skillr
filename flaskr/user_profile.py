@@ -1,10 +1,7 @@
-from datetime import datetime
-
 from flask import render_template, Blueprint, session
 
 from flaskr import db
 from flaskr.auth import login_required, bp
-from flaskr.skills import get_skill
 
 
 bp = Blueprint("profile", __name__, url_prefix="/profile")
@@ -16,17 +13,6 @@ def index():
     user_id = session['user_id']
     stats = create_user_statistics(user_id)
     return render_template('profile/user_profile.html', stats=stats)
-
-
-@bp.route('/reviews')
-@login_required
-def reviews():
-    skill = get_skill(1)
-
-    if not skill:
-        return "Skill not found", 404
-
-    return render_template('skills/skill_detail.html', skill=skill)
 
 
 def create_user_statistics(user_id):
@@ -58,10 +44,11 @@ def get_statistics(user_id):
                 WHERE o.is_completed = 0 and o.customer_id = ?) as open_orders_buyer,
             (SELECT count(o.id) as cnt from ORDERS o
                 WHERE o.is_completed = 1 and o.customer_id = ?) as completed_orders_buyer,
-            (SELECT count(r.id) as cnt from REVIEWS r, SKILLS s 
-                WHERE r.skill_id = s.id and s.user_id = ?) as total_reviews,
-            (SELECT AVG(IFNULL(r.rating,0)) as cnt from SKILLS s LEFT JOIN REVIEWS r ON r.skill_id = s.ID 
-                WHERE s.user_id = ?) as avg_score"""
+            (SELECT count(r.id) as cnt from REVIEWS r, ORDERS o, SKILLS s 
+                WHERE r.order_id = o.id and o.skill_id = s.id and s.user_id = ?) as total_reviews,
+            (SELECT ROUND(AVG(IFNULL(r.rating,0)),2) as cnt from ORDERS o LEFT JOIN REVIEWS r ON r.order_id = o.ID,
+                SKILLS s  
+                WHERE s.user_id = ? and o.skill_id = s.id) as avg_score"""
 
     result = db.query(sql, [user_id, user_id, user_id, user_id, user_id, user_id])
     return result[0] if result else None

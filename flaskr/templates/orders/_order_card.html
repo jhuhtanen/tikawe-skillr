@@ -12,9 +12,16 @@
             {% endif %}
             <p><strong>Status:</strong></p>
             <div>
-            {% if order.is_completed %}
+            {% if order.is_completed and not order.rating %}
                 <p class="price"><strong>Completed</strong></p>
-            {% else %}
+                {% if order.customer_id == session["user_id"] %}
+                    <div class="skill-actions">
+                        <a href="{{ url_for('orders.review_order', order_id=order.id) }}" class="btn">Review</a>
+                    </div>
+                {% endif %}
+            {% elif order.is_completed and order.rating %}
+                <p class="price"><strong>Reviewed</strong></p>
+            {% else%}
                 <p class="price"><strong>Open</strong></p>
             {% endif %}
             </div>
