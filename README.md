@@ -126,10 +126,16 @@ by default on gitignore because it's instance level data.
 ## Delivery on 13.04.2025
 * Current functionality:
 
-User can make an order for a skill someone else has listed.
-User can access a profile page that has the following functionlity:
+User can make an order for a skill someone else has listed. The owner of the order is the owner of the skill.
 User can complete an order someone else made for their skill. (Out of scope how the communication is handled or managed, but idea is that there's email for every user)
+User can access a profile page that has the following functionality:
 * List users skill listing (see their own skills)
 * List orders user have made for someone else
-* List orders everyone else has made for one of the skills user have
-* Show statistics 
+* List orders everyone else has made for one of the skills user have listed
+* Show reviews made for completed orders by user
+* Show statistics
+Most of the pages support pagination with a specific template that can be added to a page
+
+Additionally: There's a script that can be used to populate the database with a lot of data that allows
+testing the pagination and how site behaves with a lot of data in DB. This script is called "fill-mock-data-db.sh". 
+It can be also run with "flask --app flaskr create-mock-data" if you don't have bash execution environment. 
