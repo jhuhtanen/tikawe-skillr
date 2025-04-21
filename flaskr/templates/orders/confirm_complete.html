@@ -10,6 +10,7 @@
 <h3>Confirm complete</h3>
 <p>You are about to complete the order. Are you sure?</p>
 <form action="{{ url_for('orders.complete_order', order_id=order.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
     <input type="submit" name="confirm" class="btn" value="Confirm complete">
 </form>
 <p>

@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, request, render_template, session, flash, redirect, url_for, abort
 
 from flaskr import db
-from flaskr.auth import login_required
+from flaskr.auth import login_required, check_csrf
 from flaskr.pagination import Pagination
 from flaskr.skills import get_skill
 
@@ -51,6 +51,7 @@ def list_customer_made(page=1):
 def add_order(skill_id):
 
     if request.method == "POST":
+        check_csrf()
         commentary = request.form["additional_information"]
         user_id = session["user_id"]
         create_order(skill_id, user_id, commentary)
@@ -94,6 +95,7 @@ def complete_order(order_id):
     order = get_order(order_id)
     # check the requester actually owns this order
     check_order_ownership(order)
+    check_csrf()
 
     mark_order_completed(order["id"])
     return redirect(url_for("orders.list_customer_made"))
@@ -104,6 +106,7 @@ def complete_order(order_id):
 def review_order(order_id):
     order = get_order(order_id)
     user_id = session["user_id"]
+    check_csrf()
     # check the requester actually owns this order
     check_reviewer_is_customer(order, user_id)
 

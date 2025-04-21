@@ -33,6 +33,7 @@
     <form action="{{ form_action }}" method="post" enctype="multipart/form-data">
 
         <input type="hidden" name="category" value="{{ form.category }}">
+        <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
 
         {% if form.category %}
             <div class="form-group">
@@ -50,12 +51,12 @@
 
         <div class="form-group">
             <label for="title">Skill Title</label>
-            <input type="text" id="title" name="title" value="{{ form.title }}" required maxlength="256">
+            <input type="text" id="title" name="title" value="{{ form.title }}" required maxlength="256" placeholder="Title (max 256 chars)">
         </div>
 
         <div class="form-group">
             <label for="description">Description</label>
-            <textarea id="description" name="description" required maxlength="2048">{{ form.description }}</textarea>
+            <textarea id="description" name="description" required maxlength="2048" placeholder="Description (max 2048 chars)">{{ form.description }}</textarea>
         </div>
 
         <div class="form-group">

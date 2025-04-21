@@ -11,6 +11,7 @@
 <div class="form-container">
   <h2>Give Rating:</h2>
 <form action="{{ url_for('orders.review_order', order_id=order.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
       <div class="form-group rating-group">
         <label class="rating-label">Rating:</label>
         <div class="star-rating">

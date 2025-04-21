@@ -3,9 +3,10 @@ import re
 import secrets
 import time
 from functools import wraps
+from sys import stderr
 
-from flask import Blueprint, render_template, request, session,\
-    flash, redirect, url_for, current_app
+from flask import Blueprint, render_template, request, session, \
+    flash, redirect, url_for, current_app, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from flaskr import db
@@ -136,6 +137,7 @@ def login():
             session.clear()
             session["user_id"] = user_id
             session["username"] = username
+            session["csrf_token"] = secrets.token_hex(16)
             return redirect(url_for("main.index"))
 
         flash(error, "danger")
@@ -246,3 +248,10 @@ def login_required(f):
             return redirect(url_for("auth.login"))  # Redirect to login page
         return f(*args, **kwargs)
     return decorated_function
+
+
+def check_csrf():
+    if request.form["csrf_token"] != session["csrf_token"]:
+        abort(403)
+    else:
+        print(f"check_csrf success!", file=stderr)

@@ -9,7 +9,7 @@
 {% block content %}
     <div class="skill-detail">
         <h2>{{ order.title }}</h2>
-        <p>{{ order.description }}</p>
+        <p>{{ order.description | show_lines}}</p>
 
         {% if order.is_free %}
             <p class="price"><strong>Price:</strong> Free</p>
@@ -17,7 +17,7 @@
             <p class="price"><strong>Price:</strong> {{ order.price }} €</p>
         {% endif %}
 
-        <p>{{ order.additional_information }}</p>
+        <p>{{ order.additional_information | show_lines }}</p>
 
         {% if not order.is_completed %}
             <div class="skill-actions">

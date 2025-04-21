@@ -14,6 +14,7 @@
 {% if skill.price %} <p>{{ skill.price }} € </p> {% endif %}
 <div class="form-container">
 <form action="{{ url_for('orders.add_order', skill_id=skill.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
         <div class="form-group">
             <label for="additional_information">Additional information:</label>
             <textarea id="additional_information" name="additional_information" maxlength="512" placeholder="Additional information for the seller. Max. 512 chars."> </textarea>

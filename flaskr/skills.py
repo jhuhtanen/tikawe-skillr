@@ -6,7 +6,7 @@ from flask import Blueprint, request, render_template, redirect,\
 from werkzeug.utils import secure_filename
 
 from flaskr import db
-from flaskr.auth import login_required
+from flaskr.auth import login_required, check_csrf
 from flaskr.pagination import Pagination
 
 bp = Blueprint("skill", __name__, url_prefix="/skills")
@@ -43,6 +43,11 @@ class SkillForm:
             self.errors.append("Price must be 1 or greater!")
         if not self.subcategory:
             self.errors.append("Subcategory is required.")
+        if len(self.title) < 1 or len(self.title) > 256:
+            self.errors.append("Invalid Title length. Min 1 character, max 256 characters.")
+        if len(self.description) < 1 or len(self.description) > 2048:
+            self.errors.append("Invalid Description length. Min 1 character, max 2048 characters.")
+
         return bool(self.errors)
 
 
@@ -59,6 +64,7 @@ def create_skill():
         skill_form.subcategory = request.args.get("subcategory", None)
 
     if request.method == "POST":
+        check_csrf()
         user_id = session["user_id"]
         has_errors = skill_form.validate()
 
@@ -113,6 +119,7 @@ def edit_skill(skill_id):
         return redirect(url_for("skill.list_skills"))
 
     if request.method == "POST":
+        check_csrf()
         skill_form = SkillForm(request.form, skill)
         has_errors = skill_form.validate()
 
@@ -161,6 +168,10 @@ def delete_skill(skill_id):
     skill = get_skill(skill_id)
     # check the requester actually owns this skill
     check_skill_ownership(skill)
+    check_csrf()
+
+    if skill["order_count"] > 0:
+        return "Cannot delete skill with orders", 403
 
     delete_skill_images(skill_id)
     delete_skill_db(skill_id)
@@ -239,12 +250,14 @@ def get_skill(skill_id):
         u.username AS username,
         (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
         c.title AS category_title, cv.value AS category_value, cv.id as subcategory,
-        cv.category_id as category
+        cv.category_id as category,
+        COUNT(o.id) as order_count
         FROM skills s
         JOIN users u ON s.user_id = u.id
         JOIN category_values cv ON sc.category_value_id = cv.id
         JOIN categories c ON cv.category_id = c.id
         JOIN skill_categories sc ON sc.skill_id = s.id
+        LEFT JOIN orders o ON s.id = o.skill_id
         WHERE
         s.id = ?"""
     result = db.query(sql, [skill_id])
@@ -274,19 +287,6 @@ def delete_skill_db(skill_id):
 
 def delete_skill_images(skill_id):
     db.execute("DELETE FROM skill_images WHERE skill_id = ?", [skill_id])
-
-
-'''def get_all_skills():
-    user_id = session["user_id"]
-    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID,
-            u.username AS username,
-            (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
-            CASE WHEN s.user_id = ? THEN 1
-            ELSE 0
-            END AS is_owned
-            FROM skills s
-            JOIN users u ON s.user_id = u.id"""
-    return db.query(sql, [user_id])'''
 
 
 def get_all_skills(page, page_size):

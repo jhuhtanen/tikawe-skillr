@@ -3,13 +3,14 @@
 {% block title %}{{ skill.title }} - Skill Details{% endblock %}
 
 {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
 {% endblock %}
 
 {% block content %}
     <div class="skill-detail">
         <h2>{{ skill.title }}</h2>
-        <p>{{ skill.description }}</p>
+        <p>{{ skill.description | show_lines }}</p>
 
         {% if skill.is_free %}
             <p class="price"><strong>Price:</strong> Free</p>
@@ -25,10 +26,18 @@
             </div>
         {% endif %}
 
+        {% if skill.order_count > 0 %}
+            <div class="alert alert-danger">
+                <strong>This skill has orders, so it can't be removed!</strong>
+            </div>
+        {% endif %}
+
         {% if session["user_id"] == skill.user_id %}
             <div class="skill-actions">
                 <a href="{{ url_for('skill.edit_skill', skill_id=skill.id) }}" class="btn">Update</a>
-                <a href="{{ url_for('skill.confirm_delete', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
+                {% if skill.order_count == 0 %}
+                    <a href="{{ url_for('skill.confirm_delete', skill_id=skill.id) }}" class="btn delete-btn">Delete</a>
+                {% endif %}
             </div>
         {% else %}
             <div class="skill-actions">

@@ -1,5 +1,6 @@
 import os
 
+import markupsafe
 from flask import Flask, session, redirect, url_for
 from flaskr import db, auth, main, skills, image_upload, search, \
     user_profile, orders, create_mock_data
@@ -39,4 +40,13 @@ def create_app(test_config=None):
             return redirect(url_for('skill.list_skills'))
         return redirect(url_for('auth.login'))
 
+    # add template filter for showing line breaks
+    app.add_template_filter(show_lines)
+
     return app
+
+
+def show_lines(content):
+    content = str(markupsafe.escape(content))
+    content = content.replace("\n", "<br />")
+    return markupsafe.Markup(content)

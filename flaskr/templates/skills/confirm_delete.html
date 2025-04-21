@@ -10,6 +10,7 @@
 <h3>Confirm delete</h3>
 <p>Are you really sure you want to remove the skill?</p>
 <form action="{{ url_for('skill.delete_skill', skill_id=skill.id) }}" method="post">
+    <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
     <input type="submit" name="remove" class="btn delete-btn" value="Confirm delete">
 </form>
 <p>
