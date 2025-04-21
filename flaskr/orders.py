@@ -1,5 +1,4 @@
 from datetime import datetime
-from sys import stderr
 
 from flask import Blueprint, request, render_template, session, flash, redirect, url_for, abort
 
@@ -11,34 +10,40 @@ from flaskr.skills import get_skill
 bp = Blueprint("orders", __name__, url_prefix="/orders")
 
 
-@bp.route('/list_owned')
+@bp.route("/list_owned")
 @bp.route("/list_owned/<int:page>")
 @login_required
 def list_owned_orders(page=1):
-    user_id = session['user_id']
+    user_id = session["user_id"]
     page_size = 10
     orders = get_orders_made_by_user(user_id, page, page_size)
     orders_count = get_orders_count_made_by_user(user_id)
+    pagination_params = {"current_page": page, "total_items": orders_count,
+                         "per_page": page_size, "range_size": 8}
 
-    pagination = Pagination(current_page=page, total_items=orders_count,
-                            per_page=page_size, endpoint="orders.list_owned", extra_args={})
+    pagination = Pagination(pagination_params=pagination_params,
+                            endpoint="orders.list_owned", extra_args={})
 
-    return render_template('orders/list.html', orders=orders, view_type="made", pagination=pagination)
+    return render_template("orders/list.html",
+                           orders=orders, view_type="made", pagination=pagination)
 
 
-@bp.route('/list_customer_made')
+@bp.route("/list_customer_made")
 @bp.route("/list_customer_made/<int:page>")
 @login_required
 def list_customer_made(page=1):
-    user_id = session['user_id']
+    user_id = session["user_id"]
     page_size = 10
     orders = get_orders_made_to_user(user_id, page, page_size)
     orders_count = get_orders_count_made_to_user(user_id)
+    pagination_params = {"current_page": page, "total_items": orders_count,
+                         "per_page": page_size, "range_size": 8}
 
-    pagination = Pagination(current_page=page, total_items=orders_count,
-                            per_page=page_size, endpoint="orders.list_customer_made", extra_args={})
+    pagination = Pagination(pagination_params=pagination_params,
+                            endpoint="orders.list_customer_made", extra_args={})
 
-    return render_template('orders/list.html', orders=orders, view_type="received", pagination=pagination)
+    return render_template("orders/list.html",
+                           orders=orders, view_type="received", pagination=pagination)
 
 
 @bp.route("/add/<int:skill_id>", methods=["POST"])
@@ -47,10 +52,10 @@ def add_order(skill_id):
 
     if request.method == "POST":
         commentary = request.form["additional_information"]
-        user_id = session['user_id']
+        user_id = session["user_id"]
         create_order(skill_id, user_id, commentary)
         flash("Order has been placed!")
-        return redirect(url_for("skill.list_skills"))
+    return redirect(url_for("skill.list_skills"))
 
 
 @bp.route("/<int:skill_id>/confirm", methods=["GET"])
@@ -60,7 +65,7 @@ def confirm_order(skill_id):
     return render_template("orders/confirm.html", skill=skill)
 
 
-@bp.route('/order/<int:order_id>')
+@bp.route("/order/<int:order_id>")
 @login_required
 def order_detail(order_id):
     order = get_order(order_id)
@@ -70,7 +75,7 @@ def order_detail(order_id):
     if not order:
         return "Order not found", 404
 
-    return render_template('orders/order_detail.html', order=order)
+    return render_template("orders/order_detail.html", order=order)
 
 
 @bp.route("/<int:order_id>/confirm_complete", methods=["GET"])
@@ -98,7 +103,7 @@ def complete_order(order_id):
 @login_required
 def review_order(order_id):
     order = get_order(order_id)
-    user_id = session['user_id']
+    user_id = session["user_id"]
     # check the requester actually owns this order
     check_reviewer_is_customer(order, user_id)
 
@@ -111,19 +116,22 @@ def review_order(order_id):
     return render_template("orders/review.html", order=order)
 
 
-@bp.route('/reviews')
+@bp.route("/reviews")
 @bp.route("/reviews/<int:page>")
 @login_required
 def list_reviews(page=1):
-    user_id = session['user_id']
+    user_id = session["user_id"]
     page_size = 20
     reviews = get_reviews(user_id, page, page_size)
     review_count = get_review_count(user_id)
 
-    pagination = Pagination(current_page=page, total_items=review_count,
-                            per_page=page_size, endpoint="orders.list_reviews", extra_args={})
+    pagination_params = {"current_page": page, "total_items": review_count,
+                         "per_page": page_size, "range_size": 8}
 
-    return render_template('orders/reviews.html', reviews=reviews, pagination=pagination)
+    pagination = Pagination(pagination_params=pagination_params,
+                            endpoint="orders.list_reviews", extra_args={})
+
+    return render_template("orders/reviews.html", reviews=reviews, pagination=pagination)
 
 
 def get_orders_made_by_user(user_id, page, page_size):
@@ -178,16 +186,17 @@ def get_orders_count_made_to_user(user_id):
 
 def create_order(skill_id, customer_id, additional_commentary):
     today_str = get_time_now_formatted()
-    db.execute(
-        "INSERT INTO orders (skill_id, customer_id, is_completed, order_placed, additional_information) "
-        "VALUES (?, ?, ?, ?, ?)",
-        [skill_id, customer_id, 0, today_str, additional_commentary]
-    )
+    sql = """INSERT INTO orders
+            (skill_id, customer_id, is_completed, order_placed, additional_information)
+            VALUES (?, ?, ?, ?, ?)"""
+    db.execute(sql,
+            [skill_id, customer_id, 0, today_str, additional_commentary])
 
 
 def get_order(order_id):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
-            o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, s.user_id as owner_id
+            o.order_placed, o.order_completed, s.title, s.description, s.price,
+            u.username, s.user_id as owner_id
             FROM orders o, skills s, users u
             WHERE o.skill_id = s.id AND s.user_id = u.id
             AND o.id = ?"""
@@ -246,4 +255,4 @@ def check_reviewer_is_customer(order, customer_id):
 
 
 def get_time_now_formatted():
-    return datetime.today().strftime('%Y-%m-%d')
+    return datetime.today().strftime("%Y-%m-%d")

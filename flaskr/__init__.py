@@ -1,7 +1,8 @@
 import os
 
 from flask import Flask, session, redirect, url_for
-from flaskr import db, auth, main, skills, image_upload, search, user_profile, orders, create_mock_data
+from flaskr import db, auth, main, skills, image_upload, search, \
+    user_profile, orders, create_mock_data
 
 
 def create_app(test_config=None):

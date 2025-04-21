@@ -13,6 +13,7 @@ def get_connection():
     return g.db
 
 
+# pylint: disable=W0613
 def close_connection(e=None):
     db = g.pop('db', None)
     if db is not None:
@@ -64,4 +65,3 @@ sqlite3.register_converter(
 def init_app(app):
     app.teardown_appcontext(close_connection)
     app.cli.add_command(init_db_command)
-

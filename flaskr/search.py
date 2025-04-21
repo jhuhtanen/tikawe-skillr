@@ -17,12 +17,18 @@ def find_skills_page(page=1):
     if query:
         results = find_skills(query, page, page_size)
         skills_count = find_skills_count(query)
-        pagination = Pagination(current_page=page, total_items=skills_count,
-                                per_page=page_size, endpoint="search.find_skills_page",
+
+        pagination_params = {"current_page": page, "total_items": skills_count,
+                             "per_page": page_size, "range_size": 8}
+
+        pagination = Pagination(pagination_params=pagination_params,
+                                endpoint="search.find_skills_page",
                                 extra_args={"query": query} if query else {})
     else:
-        pagination = Pagination(current_page=1, total_items=0,
-                                per_page=page_size, endpoint="search.find_skills_page",
+        pagination_params = {"current_page": 1, "total_items": 0,
+                             "per_page": page_size, "range_size": 8}
+        pagination = Pagination(pagination_params=pagination_params,
+                                endpoint="search.find_skills_page",
                                 extra_args={"query": query} if query else {})
         results = []
 
@@ -31,7 +37,8 @@ def find_skills_page(page=1):
 
 def find_skills(query_text, page, page_size):
 
-    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID, u.username AS username, 
+    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID,
+        u.username AS username, 
         (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path, 
         c.title AS category, cv.value AS category_value, cv.category_id as category_id 
         FROM skills s  
@@ -53,10 +60,9 @@ def find_skills(query_text, page, page_size):
 
 
 def find_skills_count(query_text):
-
-    sql = """SELECT count(s.ID) as cnt 
-        FROM skills s  
-        WHERE 
+    sql = """SELECT count(s.ID) as cnt
+        FROM skills s
+        WHERE
         s.title LIKE ? OR s.description LIKE ?"""
 
     like_param = "%" + query_text + "%"

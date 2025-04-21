@@ -4,18 +4,18 @@ from flask import url_for
 
 
 class Pagination:
-    def __init__(self, current_page=1, total_items=0, per_page=10, range_size=8, endpoint=None, extra_args=None):
-        self.per_page = per_page
-        self.range_size = range_size
-        self.total_items = total_items
+    def __init__(self, pagination_params, endpoint=None, extra_args=None):
+        self.per_page = pagination_params["per_page"]
+        self.range_size = pagination_params["range_size"]
+        self.total_items = pagination_params["total_items"]
 
-        self._current_page = max(1, current_page)
-        page_count = math.ceil(total_items / per_page)
+        self._current_page = max(1, pagination_params["current_page"])
+        page_count = math.ceil(self.total_items / self.per_page)
         self._current_page = min(self._current_page, page_count)
-        self._total_pages = (total_items + per_page - 1) // per_page
+        self._total_pages = (self.total_items + self.per_page - 1) // self.per_page
 
-        self._page_range_start = ((self._current_page - 1) // range_size) * range_size + 1
-        self._page_range_end = min(self._page_range_start + range_size - 1, self._total_pages)
+        self._page_range_start = ((self._current_page - 1) // self.range_size) * self.range_size + 1
+        self._page_range_end = min(self._page_range_start + self.range_size - 1, self._total_pages)
         self._endpoint = endpoint
         self._extra_args = extra_args
 
