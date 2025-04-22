@@ -38,6 +38,11 @@
             <button type="submit" class="btn">Register</button>
         </form>
     </div>
+    {% if session["new_user"] %}
+    <div>
+        <a href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+    {% endif %}
 </body>
 
 </html>

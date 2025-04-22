@@ -14,15 +14,14 @@ The Skill & Gig Exchange platform is a web application that allows users to shar
 ### Skill Listings
 
 * Users can add new skill listings (e.g., "Guitar Lessons," "Coding Help").
-* Users can edit and delete their own skill listings.
+* Users can edit and delete their own skill listings. Deleting is only allowed if there's no orders for that skill.
 * Each skill listing can be categorized (e.g., "Music," "Technology," "Sports").
-* Users can search for skills based on keywords or categories.
+* Users can search for skills based on keywords.
 
 ### Community Interaction
 
 * Users can view all skill listings, including their own and those added by others.
-* Users can add complementary information (secondary data) to other skill listings (e.g., additional resources, related skills, or personal experiences).
-* Users can filter skills based on categories stored in the database.
+* Users can make an order for someone else's listing.
 
 ## Use Cases
 
@@ -44,15 +43,21 @@ As a user, I want to browse the available skills so that I can find people to le
 
 ### 5. Searching for Skills
 
-As a user, I want to search for skills using keywords or categories so that I can find relevant listings faster.
+As a user, I want to search for skills using keywords so that I can find relevant listings faster.
 
-### 6. Viewing User Profiles
+### 6. Adding Complementary Information
 
-As a user, I want to view other users' profiles to see what skills they have contributed and their engagement in the platform.
+As a user, I want to be able to an order for someone's skill listing.
 
-### 7. Adding Complementary Information
+### 7. Completing An Order
 
-As a user, I want to add additional information to other users’ skill listings to provide extra insights or related knowledge.
+As a user, when I have an order, I want to be able to complete it. Interaction between seller and user 
+(the one making the order) is out of the scope.
+
+### 8. Reviewing An Completed Order
+
+As a user, when seller has completed the order, I want to be able to review it. I want give some comments
+and a rating for the completed order.
 
 ## Technology Stack
 
@@ -64,39 +69,42 @@ As a user, I want to add additional information to other users’ skill listings
 
 ## Setup Instructions
 
-* Clone the repository:
+### Clone the repository:
 
-git clone https://github.com/jhuhtanen/tikawe-skillr.git
-cd tikawe-skillr 
+* git clone https://github.com/jhuhtanen/tikawe-skillr.git
+* Go to newly created folder: cd tikawe-skillr
 
-* Create and activate a virtual environment:
+### Create virtual environment:
+* Create and activate a virtual environment by running: python -m venv venv
+* Activate the virtual environment: source venv/bin/activate .On Windows use `venv\Scripts\activate`
 
-python -m venv venv
-source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+### Install dependencies:
+* pip install flask
 
-* Install dependencies:
+### Initialize the database by running:
+* flask --app flaskr init-db
+* OR
+* init-db.sh on git-bash 
 
-pip install flask
+### Make sure application has valid config
+* Copy the config.py -file from flaskr folder to instance folder.
 
-* Run the application:
+NOTE: In order for the app to work the config.py from project root needs to be copied to instance folder.
+This is due to the fact that instance folder shouldn't be in source control and config in production use is
+instance data. But for this scope of project we can use the one config that is in source control and under the root.
 
-python app.py 
+In case you see errors like current_app.config["KEY_NAME"] with KeyError it's very likely that config.py was not copied
+under instance folder.
 
-OR
+### Run the application:
 
-run.sh on git-bash
-
-* Initialize the database by running:
-
-flask --app flaskr init-db
-
-OR
-
-init-db.sh on git-bash 
-
+* python app.py 
+* OR
+* run.sh on git-bash
 * Open http://127.0.0.1:5000/ in a web browser.
 
-* Testing password reset:
+### Testing password reset:
+
 You can test the password reset in two ways. By using a mock service which just prints
 the email and link to the console from which it can be copied and pasted to browser URL. Or
 by having a local SMTP server which actually handles the SMTP call. The configuration is currently 
@@ -119,10 +127,6 @@ User can register and loging to the site. They can request forgotten password li
 User can create a skill listing, edit it and delete it.
 User can search skills by using text search from title or description.
 
-NOTE: In order for the app to work the config.py from project root needs to be copied to instance folder.
-I couldn't figure out why it needs to be copied there yet but application uses config keys and instance folder is
-by default on gitignore because it's instance level data.
-
 ## Delivery on 13.04.2025
 * Current functionality:
 
@@ -134,7 +138,7 @@ User can access a profile page that has the following functionality:
 * List orders everyone else has made for one of the skills user have listed
 * Show reviews made for completed orders by user
 * Show statistics
-Most of the pages support pagination with a specific template that can be added to a page
+* Most of the pages support pagination with a specific template that can be added to a page
 
 Additionally: There's a script that can be used to populate the database with a lot of data that allows
 testing the pagination and how site behaves with a lot of data in DB. This script is called "fill-mock-data-db.sh". 

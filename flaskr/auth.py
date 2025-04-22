@@ -113,7 +113,8 @@ def register():
         create_new_user(email, password1)
 
         flash("Registration successful! You can now log in.", "success")
-        return redirect(url_for("auth.login"))
+        session["new_user"] = True
+        return render_template("auth/register.html")
 
     return render_template("auth/register.html")
 
