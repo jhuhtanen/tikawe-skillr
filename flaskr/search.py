@@ -9,7 +9,6 @@ bp = Blueprint("search", __name__, url_prefix="/search")
 
 @bp.route("/", methods=["GET"])
 @bp.route("/<int:page>", methods=["GET"])
-@login_required
 def find_skills_page(page=1):
     query = request.args.get("query", "").strip()
     page_size = 10

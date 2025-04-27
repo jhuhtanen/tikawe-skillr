@@ -36,9 +36,7 @@ def create_app(test_config=None):
 
     @app.route('/')
     def home():
-        if 'user_id' in session:
-            return redirect(url_for('skill.list_skills'))
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('skill.list_random_skills'))
 
     # add template filter for showing line breaks
     app.add_template_filter(show_lines)

@@ -55,7 +55,7 @@ def add_order(skill_id):
         commentary = request.form["additional_information"]
         user_id = session["user_id"]
         create_order(skill_id, user_id, commentary)
-        flash("Order has been placed!")
+        flash("Order has been placed!", "success")
     return redirect(url_for("skill.list_skills"))
 
 

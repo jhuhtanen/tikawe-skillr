@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+
+{% block title %}Login required{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='skill.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="skill-detail">
+        <h2>You are not logged in.</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="skill-actions">
+            <a href="{{ url_for('auth.login', next_page=request.args.get('next_page')) }}" class="btn">Login</a>
+            <a href="{{ url_for('auth.register', next_page=request.args.get('next_page')) }}" class="btn">Register</a>
+        <div>
+    </div>
+{% endblock %}
