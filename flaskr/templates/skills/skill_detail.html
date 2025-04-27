@@ -26,7 +26,7 @@
             </div>
         {% endif %}
 
-        {% if skill.order_count > 0 %}
+        {% if session["user_id"] == skill.user_id and skill.order_count > 0 %}
             <div class="alert alert-danger">
                 <strong>This skill has orders, so it can't be removed!</strong>
             </div>
