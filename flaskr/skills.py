@@ -84,7 +84,7 @@ def create_skill():
                     img.save(file_path)
                     add_skill_image(skill_id, f"uploads/{filename}")
 
-            flash("Skill listing created with images!")
+            flash("Skill listing created with images!", "success")
             return redirect(url_for("skill.list_skills"))
 
     return render_template("skills/create.html",
@@ -180,9 +180,8 @@ def delete_skill(skill_id):
 
 
 # List all skills
-@bp.route("/")
+@bp.route("/all")
 @bp.route("/<int:page>")
-@login_required
 def list_skills(page=1):
     page_size = 10
     skills_count = get_skills_count()
@@ -193,11 +192,27 @@ def list_skills(page=1):
     pagination = Pagination(pagination_params=pagination_params,
                             endpoint="skill.list_skills", extra_args={})
     skills = get_all_skills(page, page_size)
-    return render_template("skills/list.html", skills=skills, pagination=pagination)
+    return render_template("skills/list.html", skills=skills, pagination=pagination,
+                           skills_title="All Skills")
+
+
+# List random skills
+@bp.route("/")
+def list_random_skills():
+    page_size = 10
+
+    pagination_params = {"current_page": 1, "total_items": page_size,
+                         "per_page": page_size, "range_size": 10}
+
+    pagination = Pagination(pagination_params=pagination_params,
+                            endpoint="skill.random", extra_args={})
+
+    skills = get_random_skills(page_size)
+    return render_template("skills/list.html", skills=skills, pagination=pagination,
+                           skills_title="Random Skills")
 
 
 @bp.route("/skill/<int:skill_id>")
-@login_required
 def skill_detail(skill_id):
     skill = get_skill(skill_id)
 
@@ -290,7 +305,7 @@ def delete_skill_images(skill_id):
 
 
 def get_all_skills(page, page_size):
-    user_id = session["user_id"]
+    user_id = -1 if not session.get("user_id") else session["user_id"]
     sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID,
                 u.username AS username, 
                 (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
@@ -304,6 +319,19 @@ def get_all_skills(page, page_size):
     limit = page_size
     offset = page_size * (page - 1)
     return db.query(sql, [user_id, limit, offset])
+
+
+def get_random_skills(page_size):
+    sql = """SELECT s.ID, s.TITLE, s.DESCRIPTION, s.IS_FREE, s.PRICE, s.USER_ID,
+                u.username AS username, 
+                (SELECT image_path FROM skill_images WHERE skill_images.skill_id = s.id LIMIT 1) AS image_path,
+                (SELECT 0 FROM skills) as is_owned
+                FROM skills s
+                JOIN users u ON s.user_id = u.id
+                ORDER BY RANDOM()
+                LIMIT ?"""
+
+    return db.query(sql, [page_size])
 
 
 def build_categories():

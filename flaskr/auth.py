@@ -124,33 +124,38 @@ def login():
     # clear any existing flash messages on GET
     if request.method == "GET":
         session.pop("_flashes", None)
+        next_page = request.args.get("next_page") if request.args.get("next_page") else "/"
+        return render_template("auth/login.html", next_page=next_page)
 
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+        next_page = request.form["next_page"]
         error = None
         user_id = do_login(username, password)
 
-        if user_id is None:
+        if not user_id:
             error = "Incorrect username or password"
 
-        if error is None:
+        if not error:
             session.clear()
             session["user_id"] = user_id
             session["username"] = username
             session["csrf_token"] = secrets.token_hex(16)
-            return redirect(url_for("main.index"))
+            if next_page == "/":
+                flash("You have been logged in", "success")
+            return redirect(next_page)
 
         flash(error, "danger")
 
-    return render_template("auth/login.html")
+    return render_template("auth/login.html", next_page=request.referrer)
 
 
 @bp.route("/logout")
 def logout():
     session.clear()
     flash("You have been logged out.", "success")
-    return redirect(url_for("auth.login"))
+    return redirect("/")
 
 
 @bp.route("/forgot-password", methods=["GET", "POST"])
@@ -209,6 +214,11 @@ def reset_password():
     return render_template("auth/reset_password.html")
 
 
+@bp.route("/login-required", methods=["GET"])
+def login_required():
+    return render_template("auth/login_required.html")
+
+
 def check_password(password1, password2):
     has_errors = False
     if password1 != password2:
@@ -245,8 +255,9 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if "user_id" not in session:
-            flash("You need to log in to access this page.", "warning")
-            return redirect(url_for("auth.login"))  # Redirect to login page
+            next_page = request.path
+            flash("You need to log in to access this page.", "danger")
+            return redirect(url_for("auth.login_required", next_page=next_page))
         return f(*args, **kwargs)
     return decorated_function
 

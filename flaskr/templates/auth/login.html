@@ -36,6 +36,11 @@
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required />
             </div>
+            {% if next_page %}
+            <input type="hidden" name="next_page" value="{{ next_page }}" />
+            {% else %}
+            <input type="hidden" name="next_page" value="/" />
+            {% endif %}
             <button type="submit" class="btn">Login</button>
         </form>
 
