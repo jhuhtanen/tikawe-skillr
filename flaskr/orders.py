@@ -106,15 +106,16 @@ def complete_order(order_id):
 def review_order(order_id):
     order = get_order(order_id)
     user_id = session["user_id"]
-    check_csrf()
     # check the requester actually owns this order
     check_reviewer_is_customer(order, user_id)
 
     if request.method == "POST":
+        check_csrf()
         rating = int(request.form["rating"])
         rating = max(min(rating, 5), 1)
         comment = request.form["comment"]
         create_review(order_id, user_id, rating, comment)
+        return redirect(url_for("orders.list_owned_orders"))
 
     return render_template("orders/review.html", order=order)
 

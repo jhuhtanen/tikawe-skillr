@@ -32,10 +32,10 @@
 
     <form action="{{ form_action }}" method="post" enctype="multipart/form-data">
 
-        <input type="hidden" name="category" value="{{ form.category }}">
+        <input type="hidden" name="category" value="{{ form.category or ''}}">
         <input type="hidden" name="csrf_token" value="{{ session.csrf_token }}" />
 
-        {% if form.category %}
+        {% if form.category != None %}
             <div class="form-group">
                 <label for="subcategory">Subcategory</label>
                 <select id="subcategory" name="subcategory" required>

@@ -73,25 +73,27 @@ def create_orders_reviews():
     now_str = datetime.today().strftime("%Y-%m-%d")
     # one user with a lot of orders
     for customer_id in range(2, USER_COUNT):
-        result = con.execute("""INSERT INTO orders (skill_id, customer_id, is_completed, order_placed)
-                    VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
+        result = con.execute("""INSERT INTO orders 
+                            (skill_id, customer_id, is_completed, order_placed)
+                            VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
 
         order_id = result.lastrowid
         con.execute("""INSERT INTO reviews (order_id, user_id, rating, description)
                     VALUES (?,?,?,?)""", [order_id, customer_id, random.randint(1, 5),
-                                          f"Very great review by: {str(customer_id).zfill(3)}"])
+                                          f"Very great review by: user{str(customer_id).zfill(4)}"])
 
     # rest of orders by users not having skills
-    for i in range(ORDER_COUNT):
+    for _ in range(ORDER_COUNT):
         customer_id = random.randint(REGULAR_USER_ID_START, REGULAR_USER_ID_START + USER_COUNT)
         skill_id = random.randint(1, SKILL_COUNT)
-        result = con.execute("""INSERT INTO orders (skill_id, customer_id, is_completed, order_placed)
-                    VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
+        result = con.execute("""INSERT INTO orders 
+                            (skill_id, customer_id, is_completed, order_placed)
+                            VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
 
         order_id = result.lastrowid
         con.execute("""INSERT INTO reviews (order_id, user_id, rating, description)
                     VALUES (?,?,?,?)""", [order_id, customer_id, random.randint(1, 5),
-                                          f"Very great review by: {str(customer_id).zfill(3)}"])
+                                          f"Very great review by: user{str(customer_id).zfill(4)}"])
 
     con.commit()
 

@@ -24,10 +24,13 @@ class SkillForm:
                             if form_data else skill["description"] if skill else "").strip()
         self.is_free = (form_data.get("is_free") == "1"
                         if form_data else bool(skill["is_free"]) if skill else False)
-        self.category = (form_data.get("category")
+        self.category = (form_data.get("category", "")
                          if form_data else str(skill["category"]) if skill else "").strip()
-        self.subcategory = (form_data.get("subcategory")
+        self.subcategory = (form_data.get("subcategory", "")
                             if form_data else str(skill["subcategory"]) if skill else "").strip()
+
+        if self.category in ("", "None"):
+            self.category = None
 
         if self.is_free:
             self.price = None
@@ -41,7 +44,9 @@ class SkillForm:
         if not self.is_free and \
                 (self.price is None or not self.price.isdigit() or int(self.price) < 1):
             self.errors.append("Price must be 1 or greater!")
-        if not self.subcategory:
+        if not self.category or len(self.category) < 1:
+            self.errors.append("Category is required.")
+        if not self.subcategory or len(self.subcategory) < 1:
             self.errors.append("Subcategory is required.")
         if len(self.title) < 1 or len(self.title) > 256:
             self.errors.append("Invalid Title length. Min 1 character, max 256 characters.")

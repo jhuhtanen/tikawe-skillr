@@ -266,4 +266,4 @@ def check_csrf():
     if request.form["csrf_token"] != session["csrf_token"]:
         abort(403)
     else:
-        print(f"check_csrf success!", file=stderr)
+        print("check_csrf success!", file=stderr)
