@@ -143,3 +143,54 @@ User can access a profile page that has the following functionality:
 Additionally: There's a script that can be used to populate the database with a lot of data that allows
 testing the pagination and how site behaves with a lot of data in DB. This script is called "fill-mock-data-db.sh". 
 It can be also run with "flask --app flaskr create-mock-data" if you don't have bash execution environment. 
+
+## Delivery on 04.05.2025
+This delivery contains everything on the previous deliveries, so it'a s completed web application.
+The functionality contains:
+
+### User registration, authentication and password reset
+* User can access most of the site without need to authenticate or create an account. This means browsing skills
+listed by other users. Searching skills can also be done.
+* Specific functions like Profile, Creating a skill listing, Creating an order or giving a review require account.
+* User can create account from Login page or buy accessing the functionality that requires an account. User will be
+redirected to the page requiring the account e.g. creating a new skill listing.
+* Creating account requires username which is email and a password that has some specific requirements.
+* After having created an account user can login to the site by using this account.
+* Authenticated user has access to some specific functionality mentioned above.
+* In case user forgets the password they can request password reset. Due to project
+constraints (no additional libraries) password reset is now written to server console but
+the functionality has been tested with a local SMTP server.
+
+### Skill management
+* User can browse skills created by other users by accessing all skills.
+* User can access the front page which randomises skills for greater discoverability
+* User can create a skill listing if they have an account
+* By creating a skill listing user can give information about the skill they want so share
+like title, description and category. Additionally skill can have a price or it can also be free.
+User can also upload a picture that is presented as part of the listing.
+* By completing the listing it becomes available for viewing for other users.
+* User can update their skill listing by accessing it from Profile or by searching it.
+* User can delete a skill listing if it doesn't have any orders.
+
+### Orders
+* When a user has found an interesting skill listing they can make an order.
+* Order can be placed by accessing the skill listing. On the order page user can give some additional information
+for the seller. 
+* The order can be accessed from the Profile. User can access both orders they have made as a customer and orders
+other users have done for skills they have listed.
+* Orders that are fulfilled can be completed if they are not yet completed. Fulfilment of the order is out of the
+scope of the application but generally communication would be handled via email.
+
+### Reviews
+* User who has completed orders can give a review.
+* Review is done from a completed order by giving a rating and additional commentary.
+* Seller of the skill can see their reviews from the user profile.
+
+### User profile and statistics
+* Users who are logged in can access their profile page
+* Profile page has links to: Your own skill listings, To orders you have made, To orders everyone has made to you,
+Reviews others have given to completed orders.
+* There's also a statistics section providing information about how active
+user had been on the site. 
+* The statistics include: Number of open orders (as customer), Number of completed orders (as customer), Open orders
+(as seller), Completed orders (as seller), Total reviews (as seller) and average score of the reviews.
