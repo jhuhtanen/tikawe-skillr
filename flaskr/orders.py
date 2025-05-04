@@ -22,7 +22,7 @@ def list_owned_orders(page=1):
                          "per_page": page_size, "range_size": 8}
 
     pagination = Pagination(pagination_params=pagination_params,
-                            endpoint="orders.list_owned", extra_args={})
+                            endpoint="orders.list_owned_orders", extra_args={})
 
     return render_template("orders/list.html",
                            orders=orders, view_type="made", pagination=pagination)
@@ -139,13 +139,16 @@ def list_reviews(page=1):
 
 def get_orders_made_by_user(user_id, page, page_size):
     sql = """SELECT o.id, o.skill_id, o.customer_id, o.is_completed, o.additional_information,
-            o.order_placed, o.order_completed, s.title, s.description, s.price, u.username, 
-            s.user_id as owner_id, u2.username as customer_name, r.rating
-            FROM orders o, skills s, users u, users u2
+            o.order_placed, o.order_completed,
+            s.title, s.description, s.price, owner.username,
+            owner.id as owner_id, customer.username as customer_name,
+            r.rating
+            FROM orders o
+            JOIN skills s ON o.skill_id = s.id
+            JOIN users owner ON s.user_id = owner.id
+            JOIN users customer ON o.customer_id = customer.id
             LEFT JOIN reviews r ON r.order_id = o.id AND r.user_id = o.customer_id
-            WHERE o.skill_id = s.id AND s.user_id = u.id
-            AND o.customer_id = u2.id
-            AND o.customer_id = ?  
+            WHERE o.customer_id = ?
             ORDER BY o.is_completed
             LIMIT ? OFFSET ?"""
     limit = page_size

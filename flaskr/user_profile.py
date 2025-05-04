@@ -29,26 +29,27 @@ def create_user_statistics(user_id):
 
 
 def get_statistics(user_id):
-    sql = """SELECT open_orders_seller.cnt as open_orders_seller,
-                    completed_orders_seller.cnt as completed_orders_seller,
-                    open_orders_buyer.cnt as open_orders_buyer,
-                    completed_orders_buyer.cnt as completed_orders_buyer,
-                    total_reviews.cnt as total_reviews,
-                    avg_score.cnt as avg_score
-            FROM
-            (SELECT count(o.id) as cnt from ORDERS o, SKILLS s
-                WHERE o.is_completed = 0 and o.skill_id = s.id and s.user_id = ?) as open_orders_seller,
-            (SELECT count(o.id) as cnt from ORDERS o, SKILLS s
-                WHERE o.is_completed = 1 and o.skill_id = s.id and s.user_id = ?) as completed_orders_seller,
-            (SELECT count(o.id) as cnt from ORDERS o
-                WHERE o.is_completed = 0 and o.customer_id = ?) as open_orders_buyer,
-            (SELECT count(o.id) as cnt from ORDERS o
-                WHERE o.is_completed = 1 and o.customer_id = ?) as completed_orders_buyer,
-            (SELECT count(r.id) as cnt from REVIEWS r, ORDERS o, SKILLS s
-                WHERE r.order_id = o.id and o.skill_id = s.id and s.user_id = ?) as total_reviews,
-            (SELECT ROUND(AVG(IFNULL(r.rating,0)),2) as cnt from ORDERS o LEFT JOIN REVIEWS r ON r.order_id = o.ID,
-                SKILLS s
-                WHERE s.user_id = ? and o.skill_id = s.id) as avg_score"""
-
-    result = db.query(sql, [user_id, user_id, user_id, user_id, user_id, user_id])
+    sql = """WITH user_skills AS (
+            SELECT id FROM SKILLS WHERE user_id = ?
+            ),
+            user_orders AS (
+                SELECT o.id, o.is_completed, o.customer_id, s.id AS skill_id
+                FROM ORDERS o
+                JOIN user_skills s ON o.skill_id = s.id
+            ),
+            user_reviews AS (
+                SELECT r.rating
+                FROM REVIEWS r
+                JOIN ORDERS o ON r.order_id = o.id
+                JOIN user_skills s ON o.skill_id = s.id
+            )
+        SELECT
+            IFNULL(SUM(CASE WHEN o.is_completed = 0 THEN 1 ELSE 0 END),0) AS open_orders_seller,
+            IFNULL(SUM(CASE WHEN o.is_completed = 1 THEN 1 ELSE 0 END),0) AS completed_orders_seller,
+            (SELECT COUNT(id) FROM ORDERS WHERE is_completed = 0 AND customer_id = ?) AS open_orders_buyer,
+            (SELECT COUNT(id) FROM ORDERS WHERE is_completed = 1 AND customer_id = ?) AS completed_orders_buyer,
+            (SELECT COUNT(rating) FROM user_reviews) AS total_reviews,
+            (SELECT IFNULL(ROUND(AVG(rating), 2), 0) FROM user_reviews) AS avg_score
+        FROM user_orders o;"""
+    result = db.query(sql, [user_id, user_id, user_id])
     return result[0] if result else None

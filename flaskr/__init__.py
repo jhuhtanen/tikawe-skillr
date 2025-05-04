@@ -1,7 +1,8 @@
 import os
+import time
 
 import markupsafe
-from flask import Flask, session, redirect, url_for
+from flask import Flask, session, redirect, url_for, g
 from flaskr import db, auth, main, skills, image_upload, search, \
     user_profile, orders, create_mock_data
 
@@ -41,6 +42,9 @@ def create_app(test_config=None):
     # add template filter for showing line breaks
     app.add_template_filter(show_lines)
 
+    app.before_request(start_timing)
+    app.after_request(stop_timing_and_report)
+
     return app
 
 
@@ -48,3 +52,13 @@ def show_lines(content):
     content = str(markupsafe.escape(content))
     content = content.replace("\n", "<br />")
     return markupsafe.Markup(content)
+
+
+def start_timing():
+    g.start_time = time.time() * 1000
+
+
+def stop_timing_and_report(response):
+    elapsed_time = round((time.time() * 1000) - g.start_time, 4)
+    print(f"elapsed time: {elapsed_time}ms")
+    return response

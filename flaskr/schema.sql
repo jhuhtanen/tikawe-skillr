@@ -26,6 +26,8 @@ CREATE TABLE skills (
     user_id INTEGER REFERENCES users
 );
 
+CREATE INDEX idx_user_skills ON skills (user_id);
+
 CREATE TABLE reviews (
     id INTEGER PRIMARY KEY,
     order_id INTEGER REFERENCES orders,
@@ -33,6 +35,10 @@ CREATE TABLE reviews (
     rating INTEGER NOT NULL CHECK (rating IN (0,1,2,3,4,5)),
     description TEXT
 );
+
+CREATE INDEX idx_order_reviews ON reviews (order_id);
+CREATE INDEX idx_user_reviews ON reviews (user_id);
+CREATE INDEX idx_user_order_reviews ON reviews (order_id, user_id);
 
 CREATE TABLE categories (
     id INTEGER PRIMARY KEY,
@@ -66,3 +72,7 @@ CREATE TABLE orders (
     order_completed TEXT,
     additional_information TEXT
 );
+
+CREATE INDEX idx_skill_orders ON orders (skill_id);
+CREATE INDEX idx_user_orders ON orders (customer_id);
+CREATE INDEX idx_completed_orders ON orders (is_completed);
