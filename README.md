@@ -86,6 +86,11 @@ and a rating for the completed order.
 * OR
 * init-db.sh on git-bash 
 
+### Creating mock data (OPTIONAL):
+* flask --app flaskr create-mock-data
+* OR
+* fill-mock-data-db.sh on git-bash
+
 ### Make sure application has valid config
 * Copy the config.py -file from flaskr folder to instance folder.
 
@@ -146,6 +151,7 @@ It can be also run with "flask --app flaskr create-mock-data" if you don't have 
 
 ## Delivery on 04.05.2025
 This delivery contains everything on the previous deliveries, so it'a s completed web application.
+Please, read carefully the setup part and specially pay attention to the copying of the config.py.
 The functionality contains:
 
 ### User registration, authentication and password reset
@@ -194,3 +200,22 @@ Reviews others have given to completed orders.
 user had been on the site. 
 * The statistics include: Number of open orders (as customer), Number of completed orders (as customer), Open orders
 (as seller), Completed orders (as seller), Total reviews (as seller) and average score of the reviews.
+
+### Technical information
+* The application has been tested with 1M (million = 10 ** 6) rows as orders and reviews.
+* Amount of skills has been tested with 100K (one hundred thousand = 10 ** 5) rows
+* Amount of users has been tested with 1K (one thousand) rows
+* The application remains responsive and queries execute without noticeable delay (< 200ms)
+* The application has not been tested with different amounts of simultaneous clients.
+* The database can be initialised with mock data. Read instructions above from delivery of 13.04.2025.
+* Performance statistics (with mock data described above):
+#### Without indices:
+* Access random skill listing: 1000 - 2000ms
+* Access profile: approx 2000 ms
+* Access reviews: 1000 - 2000 ms
+* Access random page of own orders: 300 - 500 ms
+#### With indices:
+* Access random skill listing: approx 50ms
+* Access profile: approx 300 - 400 ms
+* Access reviews: approx 200 - 300 ms
+* Access random page of own orders: 130 - 160 ms
