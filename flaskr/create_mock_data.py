@@ -9,7 +9,8 @@ from flaskr.db import get_connection
 
 USER_COUNT = 1000
 SKILL_COUNT = 10 ** 5
-MESSAGE_COUNT = 10 ** 6
+ORDER_COUNT = 10 ** 6
+REGULAR_USER_ID_START = USER_COUNT + 1
 
 
 def clear_reviews():
@@ -32,8 +33,16 @@ def clear_orders():
 def create_users():
     password = "Passw0rd1"
     method, salt, hash_value = generate_password_hash(password).split("$", 2)
+    # users that have skills
     for i in range(1, USER_COUNT + 1):
-        username = f"user{str(i).zfill(3)}@gmail.com"
+        username = f"user{str(i).zfill(4)}@gmail.com"
+
+        db.execute("INSERT INTO users (username, method, salt, hash) VALUES (?,?,?,?)",
+                   [username, method, salt, hash_value])
+
+    #user that just create orders and reviews
+    for i in range(REGULAR_USER_ID_START, REGULAR_USER_ID_START + USER_COUNT + 1):
+        username = f"user{str(i).zfill(4)}@gmail.com"
 
         db.execute("INSERT INTO users (username, method, salt, hash) VALUES (?,?,?,?)",
                    [username, method, salt, hash_value])
@@ -55,29 +64,35 @@ def create_skills():
     con.commit()
 
 
-def create_orders():
+def create_orders_reviews():
     con = get_connection()
     orders_receiver = 1
     query = """SELECT MIN(s.id) as sid FROM skills s WHERE s.user_id=?"""
     result = con.execute(query, [orders_receiver]).fetchall()
     skill_id = result[0]["sid"]
     now_str = datetime.today().strftime("%Y-%m-%d")
-    user_ids = list(range(2, USER_COUNT))
-    for customer_id in user_ids:
-        con.execute("""INSERT INTO orders (skill_id, customer_id, is_completed, order_placed)
+    # one user with a lot of orders
+    for customer_id in range(2, USER_COUNT):
+        result = con.execute("""INSERT INTO orders (skill_id, customer_id, is_completed, order_placed)
                     VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
-    con.commit()
 
-
-def create_reviews():
-    con = get_connection()
-    result = con.execute("""SELECT DISTINCT(o.skill_id) as oid FROM orders o""", []).fetchall()
-    order_id = result[0]["oid"]
-    user_ids = list(range(2, USER_COUNT))
-    for customer_id in user_ids:
+        order_id = result.lastrowid
         con.execute("""INSERT INTO reviews (order_id, user_id, rating, description)
                     VALUES (?,?,?,?)""", [order_id, customer_id, random.randint(1, 5),
                                           f"Very great review by: {str(customer_id).zfill(3)}"])
+
+    # rest of orders by users not having skills
+    for i in range(ORDER_COUNT):
+        customer_id = random.randint(REGULAR_USER_ID_START, REGULAR_USER_ID_START + USER_COUNT)
+        skill_id = random.randint(1, SKILL_COUNT)
+        result = con.execute("""INSERT INTO orders (skill_id, customer_id, is_completed, order_placed)
+                    VALUES (?,?,?,?)""", [skill_id, customer_id, 1, now_str])
+
+        order_id = result.lastrowid
+        con.execute("""INSERT INTO reviews (order_id, user_id, rating, description)
+                    VALUES (?,?,?,?)""", [order_id, customer_id, random.randint(1, 5),
+                                          f"Very great review by: {str(customer_id).zfill(3)}"])
+
     con.commit()
 
 
@@ -89,8 +104,7 @@ def create_mock_data():
     clear_users()
     create_users()
     create_skills()
-    create_orders()
-    create_reviews()
+    create_orders_reviews()
 
 
 def init_app(app):
